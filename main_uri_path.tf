@@ -433,25 +433,19 @@ resource "aws_api_gateway_resource" "level_6" {
   path_part   = split("/", each.value)[5]
 }
 
-# Helper local to get the correct resource based on path
-locals {
-  # Map each full path to its corresponding resource
-  path_to_resource = merge(
-    { for k, v in aws_api_gateway_resource.level_1 : k => v },
-    { for k, v in aws_api_gateway_resource.level_2 : k => v },
-    { for k, v in aws_api_gateway_resource.level_3 : k => v },
-    { for k, v in aws_api_gateway_resource.level_4 : k => v },
-    { for k, v in aws_api_gateway_resource.level_5 : k => v },
-    { for k, v in aws_api_gateway_resource.level_6 : k => v }
-  )
-}
-
 # Create {id} resources only for the complete paths specified in uri_path_var
 resource "aws_api_gateway_resource" "path_id_resource" {
   for_each = toset(local.cleaned_paths)
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  parent_id   = local.path_to_resource[each.value].id
+  parent_id   = (
+    length(split("/", each.value)) == 1 ? aws_api_gateway_resource.level_1[each.value].id :
+    length(split("/", each.value)) == 2 ? aws_api_gateway_resource.level_2[each.value].id :
+    length(split("/", each.value)) == 3 ? aws_api_gateway_resource.level_3[each.value].id :
+    length(split("/", each.value)) == 4 ? aws_api_gateway_resource.level_4[each.value].id :
+    length(split("/", each.value)) == 5 ? aws_api_gateway_resource.level_5[each.value].id :
+    aws_api_gateway_resource.level_6[each.value].id
+  )
   path_part   = "{id}"
 }
 
@@ -460,7 +454,14 @@ resource "aws_api_gateway_method" "path_options" {
   for_each = toset(local.cleaned_paths)
 
   rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  resource_id   = local.path_to_resource[each.value].id
+  resource_id   = (
+    length(split("/", each.value)) == 1 ? aws_api_gateway_resource.level_1[each.value].id :
+    length(split("/", each.value)) == 2 ? aws_api_gateway_resource.level_2[each.value].id :
+    length(split("/", each.value)) == 3 ? aws_api_gateway_resource.level_3[each.value].id :
+    length(split("/", each.value)) == 4 ? aws_api_gateway_resource.level_4[each.value].id :
+    length(split("/", each.value)) == 5 ? aws_api_gateway_resource.level_5[each.value].id :
+    aws_api_gateway_resource.level_6[each.value].id
+  )
   http_method   = "OPTIONS"
   authorization = "NONE"
 }
@@ -469,7 +470,14 @@ resource "aws_api_gateway_integration" "path_options_integration" {
   for_each = toset(local.cleaned_paths)
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  resource_id = local.path_to_resource[each.value].id
+  resource_id = (
+    length(split("/", each.value)) == 1 ? aws_api_gateway_resource.level_1[each.value].id :
+    length(split("/", each.value)) == 2 ? aws_api_gateway_resource.level_2[each.value].id :
+    length(split("/", each.value)) == 3 ? aws_api_gateway_resource.level_3[each.value].id :
+    length(split("/", each.value)) == 4 ? aws_api_gateway_resource.level_4[each.value].id :
+    length(split("/", each.value)) == 5 ? aws_api_gateway_resource.level_5[each.value].id :
+    aws_api_gateway_resource.level_6[each.value].id
+  )
   http_method = aws_api_gateway_method.path_options[each.key].http_method
   type        = "AWS_PROXY"
   integration_http_method = "POST"
@@ -502,7 +510,14 @@ resource "aws_api_gateway_method" "path_get" {
   for_each = toset(local.cleaned_paths)
 
   rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  resource_id   = local.path_to_resource[each.value].id
+  resource_id   = (
+    length(split("/", each.value)) == 1 ? aws_api_gateway_resource.level_1[each.value].id :
+    length(split("/", each.value)) == 2 ? aws_api_gateway_resource.level_2[each.value].id :
+    length(split("/", each.value)) == 3 ? aws_api_gateway_resource.level_3[each.value].id :
+    length(split("/", each.value)) == 4 ? aws_api_gateway_resource.level_4[each.value].id :
+    length(split("/", each.value)) == 5 ? aws_api_gateway_resource.level_5[each.value].id :
+    aws_api_gateway_resource.level_6[each.value].id
+  )
   http_method   = "GET"
   authorization = "NONE"
   request_parameters = {
@@ -515,7 +530,14 @@ resource "aws_api_gateway_integration" "path_get_integration" {
   for_each = toset(local.cleaned_paths)
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  resource_id = local.path_to_resource[each.value].id
+  resource_id = (
+    length(split("/", each.value)) == 1 ? aws_api_gateway_resource.level_1[each.value].id :
+    length(split("/", each.value)) == 2 ? aws_api_gateway_resource.level_2[each.value].id :
+    length(split("/", each.value)) == 3 ? aws_api_gateway_resource.level_3[each.value].id :
+    length(split("/", each.value)) == 4 ? aws_api_gateway_resource.level_4[each.value].id :
+    length(split("/", each.value)) == 5 ? aws_api_gateway_resource.level_5[each.value].id :
+    aws_api_gateway_resource.level_6[each.value].id
+  )
   http_method = aws_api_gateway_method.path_get[each.key].http_method
   integration_http_method = "POST"
   type        = "AWS_PROXY"
@@ -527,7 +549,14 @@ resource "aws_api_gateway_method" "path_post" {
   for_each = toset(local.cleaned_paths)
 
   rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  resource_id   = local.path_to_resource[each.value].id
+  resource_id   = (
+    length(split("/", each.value)) == 1 ? aws_api_gateway_resource.level_1[each.value].id :
+    length(split("/", each.value)) == 2 ? aws_api_gateway_resource.level_2[each.value].id :
+    length(split("/", each.value)) == 3 ? aws_api_gateway_resource.level_3[each.value].id :
+    length(split("/", each.value)) == 4 ? aws_api_gateway_resource.level_4[each.value].id :
+    length(split("/", each.value)) == 5 ? aws_api_gateway_resource.level_5[each.value].id :
+    aws_api_gateway_resource.level_6[each.value].id
+  )
   http_method   = "POST"
   authorization = "NONE"
   request_parameters = {
@@ -540,7 +569,14 @@ resource "aws_api_gateway_integration" "path_post_integration" {
   for_each = toset(local.cleaned_paths)
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  resource_id = local.path_to_resource[each.value].id
+  resource_id = (
+    length(split("/", each.value)) == 1 ? aws_api_gateway_resource.level_1[each.value].id :
+    length(split("/", each.value)) == 2 ? aws_api_gateway_resource.level_2[each.value].id :
+    length(split("/", each.value)) == 3 ? aws_api_gateway_resource.level_3[each.value].id :
+    length(split("/", each.value)) == 4 ? aws_api_gateway_resource.level_4[each.value].id :
+    length(split("/", each.value)) == 5 ? aws_api_gateway_resource.level_5[each.value].id :
+    aws_api_gateway_resource.level_6[each.value].id
+  )
   http_method = aws_api_gateway_method.path_post[each.key].http_method
   integration_http_method = "POST"
   type        = "AWS_PROXY"
