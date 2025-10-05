@@ -60,3 +60,23 @@ variable "common_tags" {
     Owner       = "devops-team"
   }
 }
+
+# Variable for dynamic URI paths - supports nested paths
+variable "uri_path_var" {
+  description = "List of URI paths to create endpoints for (supports nested paths)"
+  type        = list(string)
+  default     = [
+    "items",
+    "products/food/beverages",
+    "users/state/atlanta",
+    "orders/receipt1/100"
+  ]
+
+  validation {
+    condition = alltrue([
+      for path in var.uri_path_var :
+      can(regex("^[a-zA-Z0-9/_-]+$", path))
+    ])
+    error_message = "URI paths must only contain alphanumeric characters, forward slashes, hyphens, and underscores."
+  }
+}
