@@ -75,8 +75,8 @@ variable "uri_path_var" {
   validation {
     condition = alltrue([
       for path in var.uri_path_var :
-      can(regex("^[a-zA-Z0-9/_-]+$", path))
+      can(regex("^/?[a-zA-Z0-9/_.-]+$", path))
     ])
-    error_message = "URI paths must only contain alphanumeric characters, forward slashes, hyphens, and underscores."
+    error_message = "URI paths must only contain alphanumeric characters, forward slashes, hyphens, underscores, and dots. Leading slash is optional."
   }
 }

@@ -353,53 +353,123 @@ resource "aws_api_gateway_rest_api" "crud_api" {
 }
 
 # Create resources for each path in uri_path_var
-# We need to handle nested paths properly
+# Handle nested paths properly and remove leading slashes
 locals {
-  # Process paths to create a hierarchical structure
-  path_segments = distinct(flatten([
-    for path in var.uri_path_var : [
-      for i in range(length(split("/", path))) :
-      join("/", slice(split("/", path), 0, i + 1))
+  # Strip leading slashes from all paths
+  cleaned_paths = [
+    for path in var.uri_path_var :
+    trimprefix(path, "/")
+  ]
+
+  # Build all path segments needed (all intermediate paths)
+  all_path_segments = distinct(flatten([
+    for path in local.cleaned_paths : [
+      for i in range(1, length(split("/", path)) + 1) :
+      join("/", slice(split("/", path), 0, i))
     ]
   ]))
 
-  # Sort paths by depth to ensure parent resources are created first
-  sorted_paths = sort(local.path_segments)
+  # Group paths by depth level
+  paths_by_depth = {
+    for depth in range(1, 11) : # Support up to 10 levels deep
+    depth => [
+      for path in local.all_path_segments :
+      path if length(split("/", path)) == depth
+    ]
+  }
 }
 
-# Create API Gateway resources for each path segment
-resource "aws_api_gateway_resource" "path_resource" {
-  for_each = toset(local.sorted_paths)
+# Level 1 resources (root level)
+resource "aws_api_gateway_resource" "level_1" {
+  for_each = toset(lookup(local.paths_by_depth, 1, []))
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  parent_id   = each.value == split("/", each.value)[0] ? aws_api_gateway_rest_api.crud_api.root_resource_id : aws_api_gateway_resource.path_resource[join("/", slice(split("/", each.value), 0, length(split("/", each.value)) - 1))].id
-  path_part   = element(split("/", each.value), length(split("/", each.value)) - 1)
+  parent_id   = aws_api_gateway_rest_api.crud_api.root_resource_id
+  path_part   = each.value
+}
+
+# Level 2 resources
+resource "aws_api_gateway_resource" "level_2" {
+  for_each = toset(lookup(local.paths_by_depth, 2, []))
+
+  rest_api_id = aws_api_gateway_rest_api.crud_api.id
+  parent_id   = aws_api_gateway_resource.level_1[split("/", each.value)[0]].id
+  path_part   = split("/", each.value)[1]
+}
+
+# Level 3 resources
+resource "aws_api_gateway_resource" "level_3" {
+  for_each = toset(lookup(local.paths_by_depth, 3, []))
+
+  rest_api_id = aws_api_gateway_rest_api.crud_api.id
+  parent_id   = aws_api_gateway_resource.level_2[join("/", slice(split("/", each.value), 0, 2))].id
+  path_part   = split("/", each.value)[2]
+}
+
+# Level 4 resources
+resource "aws_api_gateway_resource" "level_4" {
+  for_each = toset(lookup(local.paths_by_depth, 4, []))
+
+  rest_api_id = aws_api_gateway_rest_api.crud_api.id
+  parent_id   = aws_api_gateway_resource.level_3[join("/", slice(split("/", each.value), 0, 3))].id
+  path_part   = split("/", each.value)[3]
+}
+
+# Level 5 resources
+resource "aws_api_gateway_resource" "level_5" {
+  for_each = toset(lookup(local.paths_by_depth, 5, []))
+
+  rest_api_id = aws_api_gateway_rest_api.crud_api.id
+  parent_id   = aws_api_gateway_resource.level_4[join("/", slice(split("/", each.value), 0, 4))].id
+  path_part   = split("/", each.value)[4]
+}
+
+# Level 6 resources
+resource "aws_api_gateway_resource" "level_6" {
+  for_each = toset(lookup(local.paths_by_depth, 6, []))
+
+  rest_api_id = aws_api_gateway_rest_api.crud_api.id
+  parent_id   = aws_api_gateway_resource.level_5[join("/", slice(split("/", each.value), 0, 5))].id
+  path_part   = split("/", each.value)[5]
+}
+
+# Helper local to get the correct resource based on path
+locals {
+  # Map each full path to its corresponding resource
+  path_to_resource = merge(
+    { for k, v in aws_api_gateway_resource.level_1 : k => v },
+    { for k, v in aws_api_gateway_resource.level_2 : k => v },
+    { for k, v in aws_api_gateway_resource.level_3 : k => v },
+    { for k, v in aws_api_gateway_resource.level_4 : k => v },
+    { for k, v in aws_api_gateway_resource.level_5 : k => v },
+    { for k, v in aws_api_gateway_resource.level_6 : k => v }
+  )
 }
 
 # Create {id} resources only for the complete paths specified in uri_path_var
 resource "aws_api_gateway_resource" "path_id_resource" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  parent_id   = aws_api_gateway_resource.path_resource[each.value].id
+  parent_id   = local.path_to_resource[each.value].id
   path_part   = "{id}"
 }
 
 # OPTIONS method for CORS on main paths
 resource "aws_api_gateway_method" "path_options" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  resource_id   = aws_api_gateway_resource.path_resource[each.value].id
+  resource_id   = local.path_to_resource[each.value].id
   http_method   = "OPTIONS"
   authorization = "NONE"
 }
 
 resource "aws_api_gateway_integration" "path_options_integration" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  resource_id = aws_api_gateway_resource.path_resource[each.value].id
+  resource_id = local.path_to_resource[each.value].id
   http_method = aws_api_gateway_method.path_options[each.key].http_method
   type        = "AWS_PROXY"
   integration_http_method = "POST"
@@ -408,7 +478,7 @@ resource "aws_api_gateway_integration" "path_options_integration" {
 
 # OPTIONS method for CORS on {id} paths
 resource "aws_api_gateway_method" "path_id_options" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id   = aws_api_gateway_rest_api.crud_api.id
   resource_id   = aws_api_gateway_resource.path_id_resource[each.key].id
@@ -417,7 +487,7 @@ resource "aws_api_gateway_method" "path_id_options" {
 }
 
 resource "aws_api_gateway_integration" "path_id_options_integration" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
   resource_id = aws_api_gateway_resource.path_id_resource[each.key].id
@@ -429,10 +499,10 @@ resource "aws_api_gateway_integration" "path_id_options_integration" {
 
 # GET method for main paths
 resource "aws_api_gateway_method" "path_get" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  resource_id   = aws_api_gateway_resource.path_resource[each.value].id
+  resource_id   = local.path_to_resource[each.value].id
   http_method   = "GET"
   authorization = "NONE"
   request_parameters = {
@@ -442,10 +512,10 @@ resource "aws_api_gateway_method" "path_get" {
 }
 
 resource "aws_api_gateway_integration" "path_get_integration" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  resource_id = aws_api_gateway_resource.path_resource[each.value].id
+  resource_id = local.path_to_resource[each.value].id
   http_method = aws_api_gateway_method.path_get[each.key].http_method
   integration_http_method = "POST"
   type        = "AWS_PROXY"
@@ -454,10 +524,10 @@ resource "aws_api_gateway_integration" "path_get_integration" {
 
 # POST method for main paths
 resource "aws_api_gateway_method" "path_post" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  resource_id   = aws_api_gateway_resource.path_resource[each.value].id
+  resource_id   = local.path_to_resource[each.value].id
   http_method   = "POST"
   authorization = "NONE"
   request_parameters = {
@@ -467,10 +537,10 @@ resource "aws_api_gateway_method" "path_post" {
 }
 
 resource "aws_api_gateway_integration" "path_post_integration" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  resource_id = aws_api_gateway_resource.path_resource[each.value].id
+  resource_id = local.path_to_resource[each.value].id
   http_method = aws_api_gateway_method.path_post[each.key].http_method
   integration_http_method = "POST"
   type        = "AWS_PROXY"
@@ -479,7 +549,7 @@ resource "aws_api_gateway_integration" "path_post_integration" {
 
 # GET method for {id} paths
 resource "aws_api_gateway_method" "path_id_get" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id   = aws_api_gateway_rest_api.crud_api.id
   resource_id   = aws_api_gateway_resource.path_id_resource[each.key].id
@@ -491,7 +561,7 @@ resource "aws_api_gateway_method" "path_id_get" {
 }
 
 resource "aws_api_gateway_integration" "path_id_get_integration" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
   resource_id = aws_api_gateway_resource.path_id_resource[each.key].id
@@ -503,7 +573,7 @@ resource "aws_api_gateway_integration" "path_id_get_integration" {
 
 # PUT method for {id} paths
 resource "aws_api_gateway_method" "path_id_put" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id   = aws_api_gateway_rest_api.crud_api.id
   resource_id   = aws_api_gateway_resource.path_id_resource[each.key].id
@@ -516,7 +586,7 @@ resource "aws_api_gateway_method" "path_id_put" {
 }
 
 resource "aws_api_gateway_integration" "path_id_put_integration" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
   resource_id = aws_api_gateway_resource.path_id_resource[each.key].id
@@ -528,7 +598,7 @@ resource "aws_api_gateway_integration" "path_id_put_integration" {
 
 # DELETE method for {id} paths
 resource "aws_api_gateway_method" "path_id_delete" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id   = aws_api_gateway_rest_api.crud_api.id
   resource_id   = aws_api_gateway_resource.path_id_resource[each.key].id
@@ -541,7 +611,7 @@ resource "aws_api_gateway_method" "path_id_delete" {
 }
 
 resource "aws_api_gateway_integration" "path_id_delete_integration" {
-  for_each = toset(var.uri_path_var)
+  for_each = toset(local.cleaned_paths)
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
   resource_id = aws_api_gateway_resource.path_id_resource[each.key].id
@@ -686,14 +756,14 @@ output "cloudfront_distribution_id" {
 }
 
 output "configured_paths" {
-  description = "List of configured URI paths"
-  value       = var.uri_path_var
+  description = "List of configured URI paths (cleaned, without leading slashes)"
+  value       = local.cleaned_paths
 }
 
 output "endpoint_examples" {
   description = "Example endpoints for each configured path"
   value = {
-    for path in var.uri_path_var :
+    for path in local.cleaned_paths :
     path => {
       list_all    = "https://${aws_cloudfront_distribution.crud_api_cdn.domain_name}/${path}"
       get_by_id   = "https://${aws_cloudfront_distribution.crud_api_cdn.domain_name}/${path}/{id}"
