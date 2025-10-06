@@ -292,3 +292,77 @@ For issues or questions:
 - [ ] Automated backup strategy
 - [ ] Monitoring dashboards
 - [ ] CI/CD pipeline examples
+
+  Key Features:
+
+  1. Private Subnets Only
+
+  - ✅ No Internet Gateway
+  - ✅ Internal ALB (internal = true)
+  - ✅ Only accessible within VPC or via VPN/Direct Connect
+
+  2. VPC Endpoints (No NAT Gateway needed)
+
+  - Lambda Endpoint: Allows Lambda execution without internet
+  - CloudWatch Logs Endpoint: For Lambda logging without internet
+  - Both use Interface endpoints with private DNS
+
+  3. Security Configuration
+
+  - ALB accepts traffic from:
+    - Corporate CIDR blocks (configurable via allowed_cidr_blocks)
+    - VPC internal traffic
+    - Default: Private RFC1918 ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
+
+  4. Access Methods
+
+  You can access this internal ALB through:
+
+  Option 1: EC2 in same VPC
+  # Launch EC2 in private subnet, then:
+  curl -H 'Host: malicious.com' http://internal-alb-dns/items
+
+  Option 2: VPN Connection
+  # Connect to AWS VPN, then:
+  curl -H 'Host: test.com' http://internal-alb-dns/products/food/beverages
+
+  Option 3: Direct Connect
+  - If your organization has AWS Direct Connect
+
+  Option 4: Systems Manager Session Manager
+  # No SSH needed, use SSM:
+  aws ssm start-session --target i-1234567890abcdef0
+  curl http://internal-alb-dns/items
+
+  5. Cost Savings vs Public ALB
+
+  - ✅ No NAT Gateway costs ($0.045/hour + data transfer)
+  - ✅ No Internet Gateway data transfer costs
+  - ✅ VPC Endpoints: $0.01/hour per endpoint ($14/month total)
+  - ✅ More secure for internal testing
+
+  6. Customization Variables
+
+  Add to your variables_tf_file.txt or terraform.tfvars:
+  # Set to false if you want internet-facing ALB
+  alb_internal = true
+
+  # Your organization's CIDR blocks
+  allowed_cidr_blocks = [
+    "10.0.0.0/8",      # Your corporate network
+    "172.16.0.0/12"    # Your VPN range
+  ]
+
+  What to Request from Your Organization:
+
+  1. VPC/Network Access:
+    - VPN credentials or Direct Connect access
+    - Or permission to launch EC2 for testing
+  2. CIDR Blocks:
+    - "What are our corporate network CIDR ranges?"
+    - "What CIDR ranges does our VPN use?"
+  3. ACM Certificate (for HTTPS):
+    - "Internal certificate for testpocalb.internal.yourcompany.com"
+    - Or use existing wildcard cert
+
+  This setup is perfect for WAF testing within your organization without exposing endpoints to the internet!
