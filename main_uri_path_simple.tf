@@ -430,7 +430,7 @@ resource "aws_lambda_permission" "api_gateway" {
   source_arn    = "${aws_api_gateway_rest_api.crud_api.execution_arn}/*/*"
 }
 
-# API Gateway Deployment
+# API Gateway Deployment - with triggers to force redeployment on changes
 resource "aws_api_gateway_deployment" "crud_api" {
   depends_on = [
     aws_api_gateway_integration.proxy_integration,
@@ -438,11 +438,32 @@ resource "aws_api_gateway_deployment" "crud_api" {
   ]
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  stage_name  = var.api_stage_name
+
+  # Force new deployment on any method/integration change
+  triggers = {
+    redeployment = sha1(jsonencode([
+      aws_api_gateway_method.proxy_any.id,
+      aws_api_gateway_method.root_any.id,
+      aws_api_gateway_integration.proxy_integration.id,
+      aws_api_gateway_integration.root_integration.id,
+    ]))
+  }
 
   lifecycle {
     create_before_destroy = true
   }
+}
+
+# API Gateway Stage
+resource "aws_api_gateway_stage" "crud_api" {
+  deployment_id = aws_api_gateway_deployment.crud_api.id
+  rest_api_id   = aws_api_gateway_rest_api.crud_api.id
+  stage_name    = var.api_stage_name
+
+  # Enable caching with TTL 0 to avoid caching issues during testing
+  cache_cluster_enabled = false
+
+  tags = var.common_tags
 }
 
 # CloudFront Distribution
