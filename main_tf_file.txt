@@ -419,39 +419,16 @@ resource "aws_cloudfront_distribution" "crud_api_cdn" {
     compress               = true
   }
 
-  # Cache behavior for OAuth/Authorization paths - bypass all restrictions
+  # Cache behavior for hkma/open-banking paths
   ordered_cache_behavior {
-    path_pattern     = "*oauth*"
+    path_pattern     = "hkma/*"
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = "APIGateway-${aws_api_gateway_rest_api.crud_api.id}"
 
     forwarded_values {
       query_string = true
-      headers      = ["*"]
-
-      cookies {
-        forward = "all"
-      }
-    }
-
-    viewer_protocol_policy = "allow-all"
-    min_ttl                = 0
-    default_ttl            = 0
-    max_ttl                = 0
-    compress               = false
-  }
-
-  # Cache behavior for paths with version numbers (v1.0, v2.0, etc)
-  ordered_cache_behavior {
-    path_pattern     = "*v[0-9]*"
-    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "APIGateway-${aws_api_gateway_rest_api.crud_api.id}"
-
-    forwarded_values {
-      query_string = true
-      headers      = ["*"]
+      headers      = ["Accept", "Authorization", "Content-Type", "Host", "User-Agent", "X-Forwarded-For"]
 
       cookies {
         forward = "all"
