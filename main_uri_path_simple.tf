@@ -399,6 +399,28 @@ resource "aws_api_gateway_integration" "proxy_integration" {
   }
 }
 
+# ANY method for ROOT resource (handles requests to "/" directly)
+resource "aws_api_gateway_method" "root_any" {
+  rest_api_id   = aws_api_gateway_rest_api.crud_api.id
+  resource_id   = aws_api_gateway_rest_api.crud_api.root_resource_id
+  http_method   = "ANY"
+  authorization = "NONE"
+  request_validator_id = aws_api_gateway_request_validator.proxy_validator.id
+  request_parameters = {
+    "method.request.header.Host" = false
+  }
+}
+
+# Integration for root
+resource "aws_api_gateway_integration" "root_integration" {
+  rest_api_id = aws_api_gateway_rest_api.crud_api.id
+  resource_id = aws_api_gateway_rest_api.crud_api.root_resource_id
+  http_method = aws_api_gateway_method.root_any.http_method
+  integration_http_method = "POST"
+  type        = "AWS_PROXY"
+  uri         = aws_lambda_function.crud_api.invoke_arn
+}
+
 # Lambda permissions for API Gateway
 resource "aws_lambda_permission" "api_gateway" {
   statement_id  = "AllowExecutionFromAPIGateway"
@@ -412,6 +434,7 @@ resource "aws_lambda_permission" "api_gateway" {
 resource "aws_api_gateway_deployment" "crud_api" {
   depends_on = [
     aws_api_gateway_integration.proxy_integration,
+    aws_api_gateway_integration.root_integration,
   ]
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
@@ -573,8 +596,13 @@ output "direct_api_gateway_urls" {
   value = {
     for path in local.cleaned_paths :
     path => {
-      list_all = "https://${aws_api_gateway_rest_api.crud_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.api_stage_name}/${path}"
-      post_create = "curl -X POST https://${aws_api_gateway_rest_api.crud_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.api_stage_name}/${path} -H 'Content-Type: application/json' -d '{\"name\":\"test\"}'"
+      base_url = "https://${aws_api_gateway_rest_api.crud_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.api_stage_name}/${path}"
+
+      curl_get = "curl -X GET 'https://${aws_api_gateway_rest_api.crud_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.api_stage_name}/${path}'"
+
+      curl_post = "curl -X POST 'https://${aws_api_gateway_rest_api.crud_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.api_stage_name}/${path}' -H 'Content-Type: application/json' -d '{\"name\":\"test item\",\"description\":\"test description\"}'"
+
+      curl_post_with_host = "curl -X POST 'https://${aws_api_gateway_rest_api.crud_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.api_stage_name}/${path}' -H 'Content-Type: application/json' -H 'Host: malformedurl.com' -d '{\"name\":\"test\"}'"
     }
   }
 }
@@ -584,8 +612,13 @@ output "cloudfront_urls" {
   value = {
     for path in local.cleaned_paths :
     path => {
-      list_all = "https://${aws_cloudfront_distribution.crud_api_cdn.domain_name}/${path}"
-      post_create = "curl -X POST https://${aws_cloudfront_distribution.crud_api_cdn.domain_name}/${path} -H 'Content-Type: application/json' -d '{\"name\":\"test\"}'"
+      base_url = "https://${aws_cloudfront_distribution.crud_api_cdn.domain_name}/${path}"
+
+      curl_get = "curl -X GET 'https://${aws_cloudfront_distribution.crud_api_cdn.domain_name}/${path}'"
+
+      curl_post = "curl -X POST 'https://${aws_cloudfront_distribution.crud_api_cdn.domain_name}/${path}' -H 'Content-Type: application/json' -d '{\"name\":\"test item\",\"description\":\"test description\"}'"
+
+      curl_post_with_host = "curl -X POST 'https://${aws_cloudfront_distribution.crud_api_cdn.domain_name}/${path}' -H 'Content-Type: application/json' -H 'Host: malformedurl.com' -d '{\"name\":\"test\"}'"
     }
   }
 }
