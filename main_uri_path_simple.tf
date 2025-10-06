@@ -42,49 +42,61 @@ from datetime import datetime
 storage = {}
 
 def handler(event, context):
-    print(f"Event: {json.dumps(event)}")
+    try:
+        print(f"Event: {json.dumps(event)}")
 
-    method = event.get('httpMethod', 'GET')
-    path = event.get('path', '/')
+        method = event.get('httpMethod', 'GET')
+        path = event.get('path', '/')
 
-    # Extract headers including Host header for WAF testing
-    headers = event.get('headers', {})
-    host_header = headers.get('Host', headers.get('host', 'default'))
-    print(f"Host header: {host_header}")
+        # Extract headers including Host header for WAF testing
+        headers = event.get('headers', {})
+        host_header = headers.get('Host', headers.get('host', 'default'))
+        print(f"Host header: {host_header}")
 
-    # Extract query parameters
-    query_params = event.get('queryStringParameters') or {}
-    request_param = query_params.get('request', '').lower()
+        # Extract query parameters
+        query_params = event.get('queryStringParameters') or {}
+        request_param = query_params.get('request', '').lower()
 
-    # Extract the resource type and item ID from path
-    path_parts = path.strip('/').split('/')
-
-    # For nested paths, we'll use the full path as resource type
-    # but handle the last segment specially if it looks like an ID
-    if path_parts:
-        # Check if last part is a UUID-like ID
-        potential_id = path_parts[-1] if len(path_parts) > 1 else None
-        try:
-            # Try to parse as UUID
-            if potential_id and len(potential_id) == 36:
-                uuid.UUID(potential_id)
-                resource_type = '/'.join(path_parts[:-1])
-                item_id = potential_id
-            else:
-                # Not an ID, treat full path as resource type
-                resource_type = '/'.join(path_parts)
-                item_id = None
-        except:
-            # Not a UUID, treat as part of path
-            resource_type = '/'.join(path_parts)
+        # Extract the resource type and item ID from path
+        # Handle empty path
+        path_clean = path.strip('/')
+        if not path_clean or path_clean == '':
+            resource_type = 'root'
             item_id = None
-    else:
-        resource_type = None
-        item_id = None
+            path_parts = []
+        else:
+            path_parts = path_clean.split('/')
 
-    # Initialize storage for this resource type if not exists
-    if resource_type and resource_type not in storage:
-        storage[resource_type] = {}
+            # For nested paths, we'll use the full path as resource type
+            # but handle the last segment specially if it looks like an ID
+            if path_parts:
+                # Check if last part is a UUID-like ID
+                potential_id = path_parts[-1] if len(path_parts) > 1 else None
+                try:
+                    # Try to parse as UUID
+                    if potential_id and len(potential_id) == 36:
+                        uuid.UUID(potential_id)
+                        resource_type = '/'.join(path_parts[:-1])
+                        item_id = potential_id
+                    else:
+                        # Not an ID, treat full path as resource type
+                        resource_type = '/'.join(path_parts)
+                        item_id = None
+                except:
+                    # Not a UUID, treat as part of path
+                    resource_type = '/'.join(path_parts)
+                    item_id = None
+            else:
+                resource_type = 'root'
+                item_id = None
+
+        # Initialize storage for this resource type if not exists
+        if resource_type and resource_type not in storage:
+            storage[resource_type] = {}
+
+    except Exception as init_error:
+        print(f"Initialization error: {str(init_error)}")
+        return response(500, {"error": f"Init error: {str(init_error)}"})
 
     try:
         if method == 'GET':
@@ -139,7 +151,19 @@ def handler(event, context):
 
         elif method == 'POST':
             # Create new item
-            body = json.loads(event.get('body', '{}'))
+            try:
+                body_str = event.get('body', '{}')
+                if body_str is None or body_str == '':
+                    body_str = '{}'
+                body = json.loads(body_str)
+            except Exception as json_error:
+                print(f"JSON parse error: {str(json_error)}")
+                return response(400, {
+                    "error": "Invalid JSON in request body",
+                    "details": str(json_error),
+                    "body_received": event.get('body', 'None')
+                })
+
             new_id = str(uuid.uuid4())
 
             new_item = {
@@ -148,7 +172,8 @@ def handler(event, context):
                 "description": body.get('description', ''),
                 "resource_type": resource_type,
                 "created_at": datetime.now().isoformat(),
-                "updated_at": datetime.now().isoformat()
+                "updated_at": datetime.now().isoformat(),
+                "host_header": host_header
             }
 
             # Add any additional fields from body
@@ -183,6 +208,7 @@ def handler(event, context):
                     })
 
             storage[resource_type][new_id] = new_item
+            print(f"POST successful: Created item {new_id} in {resource_type}")
             return response(201, new_item)
 
         elif method == 'PUT':
