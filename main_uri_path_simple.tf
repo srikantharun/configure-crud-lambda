@@ -438,32 +438,26 @@ resource "aws_api_gateway_deployment" "crud_api" {
   ]
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
+  stage_name  = var.api_stage_name
 
   # Force new deployment on any method/integration change
   triggers = {
     redeployment = sha1(jsonencode([
+      aws_api_gateway_resource.proxy.id,
       aws_api_gateway_method.proxy_any.id,
       aws_api_gateway_method.root_any.id,
       aws_api_gateway_integration.proxy_integration.id,
       aws_api_gateway_integration.root_integration.id,
+      timestamp()  # Force redeployment every time
     ]))
   }
 
   lifecycle {
     create_before_destroy = true
   }
-}
 
-# API Gateway Stage
-resource "aws_api_gateway_stage" "crud_api" {
-  deployment_id = aws_api_gateway_deployment.crud_api.id
-  rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  stage_name    = var.api_stage_name
-
-  # Enable caching with TTL 0 to avoid caching issues during testing
-  cache_cluster_enabled = false
-
-  tags = var.common_tags
+  # Add description with timestamp to force changes
+  description = "Deployment at ${timestamp()}"
 }
 
 # CloudFront Distribution
