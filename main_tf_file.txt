@@ -32,57 +32,54 @@ from datetime import datetime
 storage = {}
 
 def handler(event, context):
-    print(f"Event: {json.dumps(event)}")
+    try:
+        print(f"Event: {json.dumps(event)}")
 
-    method = event.get('httpMethod', 'GET')
-    path = event.get('path', '/')
+        method = event.get('httpMethod', 'GET')
+        path = event.get('path', '/')
 
-    # Extract query parameters
-    query_params = event.get('queryStringParameters') or {}
-    request_param = query_params.get('request', '').lower()
+        # Extract query parameters
+        query_params = event.get('queryStringParameters') or {}
+        request_param = query_params.get('request', '').lower()
 
-    # Parse path to extract resource_type and item_id
-    path_clean = path.strip('/')
+        # Parse path to extract resource_type and item_id
+        path_clean = path.strip('/')
 
-    # Remove stage name if present (e.g., /dev/items -> items)
-    if path_clean.startswith('${var.api_stage_name}/'):
-        path_clean = path_clean[len('${var.api_stage_name}')+1:]
+        # API Gateway strips stage from path automatically in proxy integration
 
-    if not path_clean:
-        resource_type = 'root'
-        item_id = None
-    else:
-        path_parts = path_clean.split('/')
+        if not path_clean:
+            resource_type = 'root'
+            item_id = None
+        else:
+            path_parts = path_clean.split('/')
 
-        # Check if last segment is a UUID (36 chars with dashes)
-        if len(path_parts) > 1:
-            potential_id = path_parts[-1]
-            try:
-                if len(potential_id) == 36 and '-' in potential_id:
-                    uuid.UUID(potential_id)
-                    # Last part is UUID, rest is resource path
-                    resource_type = '/'.join(path_parts[:-1])
-                    item_id = potential_id
-                else:
-                    # Not a UUID, full path is resource
+            # Check if last segment is a UUID (36 chars with dashes)
+            if len(path_parts) > 1:
+                potential_id = path_parts[-1]
+                try:
+                    if len(potential_id) == 36 and '-' in potential_id:
+                        uuid.UUID(potential_id)
+                        # Last part is UUID, rest is resource path
+                        resource_type = '/'.join(path_parts[:-1])
+                        item_id = potential_id
+                    else:
+                        # Not a UUID, full path is resource
+                        resource_type = '/'.join(path_parts)
+                        item_id = None
+                except:
+                    # Not a valid UUID
                     resource_type = '/'.join(path_parts)
                     item_id = None
-            except:
-                # Not a valid UUID
-                resource_type = '/'.join(path_parts)
+            else:
+                # Single segment path
+                resource_type = path_parts[0]
                 item_id = None
-        else:
-            # Single segment path
-            resource_type = path_parts[0]
-            item_id = None
 
-    # Initialize storage for this resource type
-    if resource_type not in storage:
-        storage[resource_type] = {}
+        # Initialize storage for this resource type
+        if resource_type not in storage:
+            storage[resource_type] = {}
 
-    print(f"Method: {method}, Resource: {resource_type}, ID: {item_id}")
-    
-    try:
+        print(f"Method: {method}, Resource: {resource_type}, ID: {item_id}")
         if method == 'GET':
             if item_id:
                 # Get single item
@@ -133,7 +130,8 @@ def handler(event, context):
                 
         elif method == 'POST':
             # Create new item
-            body = json.loads(event.get('body', '{}'))
+            body_str = event.get('body') or '{}'
+            body = json.loads(body_str)
             new_id = str(uuid.uuid4())
 
             # Support for request parameter to modify creation behavior
@@ -188,7 +186,8 @@ def handler(event, context):
             if item_id not in storage[resource_type]:
                 return response(404, {"error": "Item not found", "resource": resource_type})
 
-            body = json.loads(event.get('body', '{}'))
+            body_str = event.get('body') or '{}'
+            body = json.loads(body_str)
 
             # Update with merge or replace based on request parameter
             if request_param == 'replace':
