@@ -28,34 +28,71 @@ import json
 import uuid
 from datetime import datetime
 
-# Simple in-memory storage (use DynamoDB for production)
-items = {}
+# In-memory storage organized by resource path
+storage = {}
 
 def handler(event, context):
     print(f"Event: {json.dumps(event)}")
-    
+
     method = event.get('httpMethod', 'GET')
     path = event.get('path', '/')
-    
+
     # Extract query parameters
     query_params = event.get('queryStringParameters') or {}
     request_param = query_params.get('request', '').lower()
-    
-    # Extract item ID from path if present
-    path_parts = path.strip('/').split('/')
-    item_id = path_parts[-1] if len(path_parts) > 1 and path_parts[-1] != 'items' else None
+
+    # Parse path to extract resource_type and item_id
+    path_clean = path.strip('/')
+
+    # Remove stage name if present (e.g., /dev/items -> items)
+    if path_clean.startswith('${var.api_stage_name}/'):
+        path_clean = path_clean[len('${var.api_stage_name}')+1:]
+
+    if not path_clean:
+        resource_type = 'root'
+        item_id = None
+    else:
+        path_parts = path_clean.split('/')
+
+        # Check if last segment is a UUID (36 chars with dashes)
+        if len(path_parts) > 1:
+            potential_id = path_parts[-1]
+            try:
+                if len(potential_id) == 36 and '-' in potential_id:
+                    uuid.UUID(potential_id)
+                    # Last part is UUID, rest is resource path
+                    resource_type = '/'.join(path_parts[:-1])
+                    item_id = potential_id
+                else:
+                    # Not a UUID, full path is resource
+                    resource_type = '/'.join(path_parts)
+                    item_id = None
+            except:
+                # Not a valid UUID
+                resource_type = '/'.join(path_parts)
+                item_id = None
+        else:
+            # Single segment path
+            resource_type = path_parts[0]
+            item_id = None
+
+    # Initialize storage for this resource type
+    if resource_type not in storage:
+        storage[resource_type] = {}
+
+    print(f"Method: {method}, Resource: {resource_type}, ID: {item_id}")
     
     try:
         if method == 'GET':
-            if item_id and item_id != 'items':
+            if item_id:
                 # Get single item
-                if item_id in items:
-                    return response(200, items[item_id])
+                if item_id in storage[resource_type]:
+                    return response(200, storage[resource_type][item_id])
                 else:
-                    return response(404, {"error": "Item not found"})
+                    return response(404, {"error": "Item not found", "resource": resource_type})
             else:
                 # Get all items with optional filtering
-                all_items = list(items.values())
+                all_items = list(storage[resource_type].values())
                 
                 # Filter by request parameter if provided
                 if request_param:
@@ -66,7 +103,8 @@ def handler(event, context):
                         or request_param in item.get('description', '').lower()
                     ]
                     return response(200, {
-                        "items": filtered_items, 
+                        "resource": resource_type,
+                        "items": filtered_items,
                         "count": len(filtered_items),
                         "filter": request_param
                     })
@@ -81,32 +119,38 @@ def handler(event, context):
                                 if str(item.get(key, '')).lower() == value.lower()
                             ]
                     return response(200, {
+                        "resource": resource_type,
                         "items": filtered_items,
                         "count": len(filtered_items),
                         "filters": query_params
                     })
-                
-                return response(200, {"items": all_items, "count": len(all_items)})
+
+                return response(200, {
+                    "resource": resource_type,
+                    "items": all_items,
+                    "count": len(all_items)
+                })
                 
         elif method == 'POST':
             # Create new item
             body = json.loads(event.get('body', '{}'))
             new_id = str(uuid.uuid4())
-            
+
             # Support for request parameter to modify creation behavior
             new_item = {
                 "id": new_id,
                 "name": body.get('name', 'Unnamed'),
                 "description": body.get('description', ''),
+                "resource": resource_type,
                 "created_at": datetime.now().isoformat(),
                 "updated_at": datetime.now().isoformat()
             }
-            
+
             # Add any additional fields from body
             for key, value in body.items():
                 if key not in new_item:
                     new_item[key] = value
-            
+
             # Handle special request parameters
             if request_param == 'bulk':
                 # Support bulk creation if multiple items in array
@@ -118,6 +162,7 @@ def handler(event, context):
                             "id": bulk_id,
                             "name": item_data.get('name', 'Unnamed'),
                             "description": item_data.get('description', ''),
+                            "resource": resource_type,
                             "created_at": datetime.now().isoformat(),
                             "updated_at": datetime.now().isoformat()
                         }
@@ -125,72 +170,73 @@ def handler(event, context):
                         for k, v in item_data.items():
                             if k not in bulk_item:
                                 bulk_item[k] = v
-                        items[bulk_id] = bulk_item
+                        storage[resource_type][bulk_id] = bulk_item
                         created_items.append(bulk_item)
                     return response(201, {
-                        "message": "Bulk creation successful",
+                        "message": f"Bulk creation successful in {resource_type}",
                         "items": created_items,
                         "count": len(created_items)
                     })
-            
-            items[new_id] = new_item
+
+            storage[resource_type][new_id] = new_item
             return response(201, new_item)
             
         elif method == 'PUT':
             # Update item
-            if not item_id or item_id == 'items':
-                return response(400, {"error": "Item ID required"})
-            if item_id not in items:
-                return response(404, {"error": "Item not found"})
-                
+            if not item_id:
+                return response(400, {"error": "Item ID required for update"})
+            if item_id not in storage[resource_type]:
+                return response(404, {"error": "Item not found", "resource": resource_type})
+
             body = json.loads(event.get('body', '{}'))
-            
+
             # Update with merge or replace based on request parameter
             if request_param == 'replace':
                 # Replace entire item (keeping id and created_at)
-                items[item_id] = {
+                storage[resource_type][item_id] = {
                     "id": item_id,
                     "name": body.get('name', 'Unnamed'),
                     "description": body.get('description', ''),
-                    "created_at": items[item_id].get('created_at'),
+                    "resource": resource_type,
+                    "created_at": storage[resource_type][item_id].get('created_at'),
                     "updated_at": datetime.now().isoformat()
                 }
                 # Add any additional fields
                 for key, value in body.items():
                     if key not in ['id', 'created_at']:
-                        items[item_id][key] = value
+                        storage[resource_type][item_id][key] = value
             else:
                 # Default: merge update
-                items[item_id].update({
-                    "name": body.get('name', items[item_id]['name']),
-                    "description": body.get('description', items[item_id]['description']),
+                storage[resource_type][item_id].update({
+                    "name": body.get('name', storage[resource_type][item_id]['name']),
+                    "description": body.get('description', storage[resource_type][item_id]['description']),
                     "updated_at": datetime.now().isoformat()
                 })
                 # Update any additional fields
                 for key, value in body.items():
                     if key not in ['id', 'created_at']:
-                        items[item_id][key] = value
-            
-            return response(200, items[item_id])
+                        storage[resource_type][item_id][key] = value
+
+            return response(200, storage[resource_type][item_id])
             
         elif method == 'DELETE':
             # Delete item
-            if not item_id or item_id == 'items':
+            if not item_id:
                 # Support bulk delete with request parameter
                 if request_param == 'all':
-                    count = len(items)
-                    items.clear()
+                    count = len(storage[resource_type])
+                    storage[resource_type].clear()
                     return response(200, {
-                        "message": f"Deleted all items",
+                        "message": f"Deleted all items from {resource_type}",
                         "count": count
                     })
-                return response(400, {"error": "Item ID required"})
-            
-            if item_id not in items:
-                return response(404, {"error": "Item not found"})
-                
-            deleted_item = items.pop(item_id)
-            return response(200, {"message": "Item deleted", "item": deleted_item})
+                return response(400, {"error": "Item ID required for deletion"})
+
+            if item_id not in storage[resource_type]:
+                return response(404, {"error": "Item not found", "resource": resource_type})
+
+            deleted_item = storage[resource_type].pop(item_id)
+            return response(200, {"message": f"Item deleted from {resource_type}", "item": deleted_item})
             
         elif method == 'OPTIONS':
             # Handle CORS preflight
@@ -284,145 +330,29 @@ resource "aws_api_gateway_rest_api" "crud_api" {
   tags = var.common_tags
 }
 
-# API Gateway Resource for /items
-resource "aws_api_gateway_resource" "items" {
+# API Gateway Resource for {proxy+} - catches ALL paths
+resource "aws_api_gateway_resource" "proxy" {
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
   parent_id   = aws_api_gateway_rest_api.crud_api.root_resource_id
-  path_part   = "items"
+  path_part   = "{proxy+}"
 }
 
-# API Gateway Resource for /items/{id}
-resource "aws_api_gateway_resource" "item_id" {
-  rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  parent_id   = aws_api_gateway_resource.items.id
-  path_part   = "{id}"
-}
-
-# Enable CORS for /items
-resource "aws_api_gateway_method" "items_options" {
+# ANY method for {proxy+} - handles ALL HTTP methods
+resource "aws_api_gateway_method" "proxy_any" {
   rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  resource_id   = aws_api_gateway_resource.items.id
-  http_method   = "OPTIONS"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_integration" "items_options_integration" {
-  rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  resource_id = aws_api_gateway_resource.items.id
-  http_method = aws_api_gateway_method.items_options.http_method
-  type        = "AWS_PROXY"
-  integration_http_method = "POST"
-  uri         = aws_lambda_function.crud_api.invoke_arn
-}
-
-# Enable CORS for /items/{id}
-resource "aws_api_gateway_method" "item_id_options" {
-  rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  resource_id   = aws_api_gateway_resource.item_id.id
-  http_method   = "OPTIONS"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_integration" "item_id_options_integration" {
-  rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  resource_id = aws_api_gateway_resource.item_id.id
-  http_method = aws_api_gateway_method.item_id_options.http_method
-  type        = "AWS_PROXY"
-  integration_http_method = "POST"
-  uri         = aws_lambda_function.crud_api.invoke_arn
-}
-
-# Methods for /items (GET, POST)
-resource "aws_api_gateway_method" "items_get" {
-  rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  resource_id   = aws_api_gateway_resource.items.id
-  http_method   = "GET"
+  resource_id   = aws_api_gateway_resource.proxy.id
+  http_method   = "ANY"
   authorization = "NONE"
   request_parameters = {
-    "method.request.querystring.request" = false
+    "method.request.path.proxy" = true
   }
 }
 
-resource "aws_api_gateway_method" "items_post" {
-  rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  resource_id   = aws_api_gateway_resource.items.id
-  http_method   = "POST"
-  authorization = "NONE"
-  request_parameters = {
-    "method.request.querystring.request" = false
-  }
-}
-
-# Methods for /items/{id} (GET, PUT, DELETE)
-resource "aws_api_gateway_method" "item_get" {
-  rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  resource_id   = aws_api_gateway_resource.item_id.id
-  http_method   = "GET"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_method" "item_put" {
-  rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  resource_id   = aws_api_gateway_resource.item_id.id
-  http_method   = "PUT"
-  authorization = "NONE"
-  request_parameters = {
-    "method.request.querystring.request" = false
-  }
-}
-
-resource "aws_api_gateway_method" "item_delete" {
-  rest_api_id   = aws_api_gateway_rest_api.crud_api.id
-  resource_id   = aws_api_gateway_resource.item_id.id
-  http_method   = "DELETE"
-  authorization = "NONE"
-  request_parameters = {
-    "method.request.querystring.request" = false
-  }
-}
-
-# Integrations for /items
-resource "aws_api_gateway_integration" "items_get_integration" {
+# Integration for {proxy+}
+resource "aws_api_gateway_integration" "proxy_integration" {
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  resource_id = aws_api_gateway_resource.items.id
-  http_method = aws_api_gateway_method.items_get.http_method
-  integration_http_method = "POST"
-  type        = "AWS_PROXY"
-  uri         = aws_lambda_function.crud_api.invoke_arn
-}
-
-resource "aws_api_gateway_integration" "items_post_integration" {
-  rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  resource_id = aws_api_gateway_resource.items.id
-  http_method = aws_api_gateway_method.items_post.http_method
-  integration_http_method = "POST"
-  type        = "AWS_PROXY"
-  uri         = aws_lambda_function.crud_api.invoke_arn
-}
-
-# Integrations for /items/{id}
-resource "aws_api_gateway_integration" "item_get_integration" {
-  rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  resource_id = aws_api_gateway_resource.item_id.id
-  http_method = aws_api_gateway_method.item_get.http_method
-  integration_http_method = "POST"
-  type        = "AWS_PROXY"
-  uri         = aws_lambda_function.crud_api.invoke_arn
-}
-
-resource "aws_api_gateway_integration" "item_put_integration" {
-  rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  resource_id = aws_api_gateway_resource.item_id.id
-  http_method = aws_api_gateway_method.item_put.http_method
-  integration_http_method = "POST"
-  type        = "AWS_PROXY"
-  uri         = aws_lambda_function.crud_api.invoke_arn
-}
-
-resource "aws_api_gateway_integration" "item_delete_integration" {
-  rest_api_id = aws_api_gateway_rest_api.crud_api.id
-  resource_id = aws_api_gateway_resource.item_id.id
-  http_method = aws_api_gateway_method.item_delete.http_method
+  resource_id = aws_api_gateway_resource.proxy.id
+  http_method = aws_api_gateway_method.proxy_any.http_method
   integration_http_method = "POST"
   type        = "AWS_PROXY"
   uri         = aws_lambda_function.crud_api.invoke_arn
@@ -440,13 +370,7 @@ resource "aws_lambda_permission" "api_gateway" {
 # API Gateway Deployment
 resource "aws_api_gateway_deployment" "crud_api" {
   depends_on = [
-    aws_api_gateway_integration.items_get_integration,
-    aws_api_gateway_integration.items_post_integration,
-    aws_api_gateway_integration.item_get_integration,
-    aws_api_gateway_integration.item_put_integration,
-    aws_api_gateway_integration.item_delete_integration,
-    aws_api_gateway_integration.items_options_integration,
-    aws_api_gateway_integration.item_id_options_integration,
+    aws_api_gateway_integration.proxy_integration,
   ]
 
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
