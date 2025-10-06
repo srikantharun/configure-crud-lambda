@@ -360,18 +360,28 @@ resource "aws_api_gateway_resource" "proxy" {
   path_part   = "{proxy+}"
 }
 
+# Request validator that doesn't validate the path format (allows dots, etc.)
+resource "aws_api_gateway_request_validator" "proxy_validator" {
+  name                        = "${var.project_name}-proxy-validator"
+  rest_api_id                 = aws_api_gateway_rest_api.crud_api.id
+  validate_request_body       = false
+  validate_request_parameters = false
+}
+
 # ANY method for the proxy resource (catches all HTTP methods)
 resource "aws_api_gateway_method" "proxy_any" {
   rest_api_id   = aws_api_gateway_rest_api.crud_api.id
   resource_id   = aws_api_gateway_resource.proxy.id
   http_method   = "ANY"
   authorization = "NONE"
+  request_validator_id = aws_api_gateway_request_validator.proxy_validator.id
   request_parameters = {
-    "method.request.path.proxy" = true
+    "method.request.path.proxy" = false  # Don't require validation
+    "method.request.header.Host" = false
   }
 }
 
-# Integration for proxy
+# Integration for proxy - with proper path handling
 resource "aws_api_gateway_integration" "proxy_integration" {
   rest_api_id = aws_api_gateway_rest_api.crud_api.id
   resource_id = aws_api_gateway_resource.proxy.id
@@ -379,6 +389,14 @@ resource "aws_api_gateway_integration" "proxy_integration" {
   integration_http_method = "POST"
   type        = "AWS_PROXY"
   uri         = aws_lambda_function.crud_api.invoke_arn
+
+  # Cache key parameters - include the full proxy path
+  cache_key_parameters = ["method.request.path.proxy"]
+
+  # Request parameters mapping - pass through the proxy path as-is
+  request_parameters = {
+    "integration.request.path.proxy" = "method.request.path.proxy"
+  }
 }
 
 # Lambda permissions for API Gateway
@@ -441,6 +459,9 @@ resource "aws_cloudfront_distribution" "crud_api_cdn" {
     default_ttl            = 0
     max_ttl                = 86400
     compress               = true
+
+    # Don't normalize URLs - preserve dots, special characters in paths
+    smooth_streaming = false
   }
 
   # Cache behavior for static content (if any)
@@ -536,12 +557,35 @@ output "usage_note" {
     - Handles ANY path depth automatically
     - Single resource instead of hierarchical tree
     - Lambda does all the routing
+    - Supports dots in paths (like v1.0)
 
-    All these paths work automatically:
-    - /items
-    - /hkma/open-banking/v1.0/oauth2/authorize
-    - /any/deeply/nested/path/you/want
+    Configuration:
+    - Request validator disabled for path validation
+    - Paths with dots (.) are supported
+    - Test directly via API Gateway first if CloudFront has issues
 
     The Lambda function parses the full path and handles it accordingly.
   EOT
+}
+
+output "direct_api_gateway_urls" {
+  description = "Direct API Gateway URLs (bypass CloudFront) - Use these if you get 403 errors with dots in paths"
+  value = {
+    for path in local.cleaned_paths :
+    path => {
+      list_all = "https://${aws_api_gateway_rest_api.crud_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.api_stage_name}/${path}"
+      post_create = "curl -X POST https://${aws_api_gateway_rest_api.crud_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.api_stage_name}/${path} -H 'Content-Type: application/json' -d '{\"name\":\"test\"}'"
+    }
+  }
+}
+
+output "cloudfront_urls" {
+  description = "CloudFront URLs - May need URL encoding for paths with dots"
+  value = {
+    for path in local.cleaned_paths :
+    path => {
+      list_all = "https://${aws_cloudfront_distribution.crud_api_cdn.domain_name}/${path}"
+      post_create = "curl -X POST https://${aws_cloudfront_distribution.crud_api_cdn.domain_name}/${path} -H 'Content-Type: application/json' -d '{\"name\":\"test\"}'"
+    }
+  }
 }

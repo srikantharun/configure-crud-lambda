@@ -21,6 +21,15 @@ provider "aws" {
   region = var.aws_region
 }
 
+# Local variables for path handling
+locals {
+  # Strip leading slashes from all paths for consistency
+  cleaned_paths_private = [
+    for path in var.uri_path_var :
+    trimprefix(path, "/")
+  ]
+}
+
 # Variable to control ALB type
 variable "alb_internal" {
   description = "Whether the ALB should be internal (private) or internet-facing"
@@ -641,7 +650,7 @@ output "private_subnet_ids" {
 output "alb_private_endpoint_examples" {
   description = "Example endpoints for each configured path via Internal ALB"
   value = {
-    for path in var.uri_path_var :
+    for path in local.cleaned_paths_private :
     path => {
       list_all    = "http://${aws_lb.main_private.dns_name}/${path}"
       get_by_id   = "http://${aws_lb.main_private.dns_name}/${path}/{id}"

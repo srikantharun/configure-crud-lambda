@@ -21,6 +21,15 @@ provider "aws" {
   region = var.aws_region
 }
 
+# Local variables for path handling
+locals {
+  # Strip leading slashes from all paths for consistency
+  cleaned_paths = [
+    for path in var.uri_path_var :
+    trimprefix(path, "/")
+  ]
+}
+
 # VPC Configuration for ALB
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
@@ -570,7 +579,7 @@ output "vpc_id" {
 output "alb_endpoint_examples" {
   description = "Example endpoints for each configured path via ALB"
   value = {
-    for path in var.uri_path_var :
+    for path in local.cleaned_paths :
     path => {
       list_all    = "http://${aws_lb.main.dns_name}/${path}"
       get_by_id   = "http://${aws_lb.main.dns_name}/${path}/{id}"
