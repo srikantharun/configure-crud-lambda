@@ -38,6 +38,18 @@ def handler(event, context):
         method = event.get('httpMethod', 'GET')
         path = event.get('path', '/')
 
+        # Extract headers for custom Host validation
+        headers = event.get('headers', {})
+        custom_host = (
+            headers.get('X-Custom-Host') or
+            headers.get('x-custom-host') or
+            headers.get('Host') or
+            headers.get('host') or
+            'default-host'
+        )
+
+        print(f"Custom Host header: {custom_host}")
+
         # Extract query parameters
         query_params = event.get('queryStringParameters') or {}
         request_param = query_params.get('request', '').lower()
@@ -103,7 +115,8 @@ def handler(event, context):
                         "resource": resource_type,
                         "items": filtered_items,
                         "count": len(filtered_items),
-                        "filter": request_param
+                        "filter": request_param,
+                        "custom_host": custom_host
                     })
                 
                 # Filter by any other query parameters
@@ -119,13 +132,15 @@ def handler(event, context):
                         "resource": resource_type,
                         "items": filtered_items,
                         "count": len(filtered_items),
-                        "filters": query_params
+                        "filters": query_params,
+                        "custom_host": custom_host
                     })
 
                 return response(200, {
                     "resource": resource_type,
                     "items": all_items,
-                    "count": len(all_items)
+                    "count": len(all_items),
+                    "custom_host": custom_host
                 })
                 
         elif method == 'POST':
@@ -140,6 +155,7 @@ def handler(event, context):
                 "name": body.get('name', 'Unnamed'),
                 "description": body.get('description', ''),
                 "resource": resource_type,
+                "custom_host": custom_host,
                 "created_at": datetime.now().isoformat(),
                 "updated_at": datetime.now().isoformat()
             }
@@ -405,7 +421,7 @@ resource "aws_cloudfront_distribution" "crud_api_cdn" {
 
     forwarded_values {
       query_string = true
-      headers      = ["Accept", "Authorization", "Content-Type", "Host", "User-Agent", "X-Forwarded-For"]
+      headers      = ["Accept", "Authorization", "Content-Type", "X-Forwarded-For", "X-Custom-Host"]
 
       cookies {
         forward = "none"
@@ -417,27 +433,6 @@ resource "aws_cloudfront_distribution" "crud_api_cdn" {
     default_ttl            = 0
     max_ttl                = 0
     compress               = true
-  }
-
-  # Cache behavior for static content (if any)
-  ordered_cache_behavior {
-    path_pattern     = "static/*"
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "APIGateway-${aws_api_gateway_rest_api.crud_api.id}"
-
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
-      }
-    }
-
-    min_ttl                = 0
-    default_ttl            = 86400
-    max_ttl                = 31536000
-    compress               = true
-    viewer_protocol_policy = "redirect-to-https"
   }
 
   price_class = var.cloudfront_price_class
