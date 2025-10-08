@@ -26,10 +26,30 @@ resource "local_file" "lambda_code" {
   content = <<EOF
 import json
 import uuid
+import re
 from datetime import datetime
 
 # In-memory storage organized by resource path
 storage = {}
+
+# Allowed Host header patterns (from WAF regex pattern set)
+ALLOWED_HOST_PATTERNS = [
+    r'^.*\.execute-api\..*\.amazonaws\.com$',  # API Gateway
+    r'^.*\.cloudfront\.net$',                   # CloudFront
+    r'^.*\.lambda-url\..*\.on\.aws$',          # Lambda Function URL
+    # Pattern 1: sitluat/preprod/prod environments
+    r'^([a-z0-9-]+\.)*(sitluat|preprod|prod)\.ap-east-1\.(pm4c|peak|dragon)\.cloud1\.vv1865\.com$',
+    # Pattern 2: paymebiz subdomain
+    r'^([a-z0-9-]+\.)*paymebiz\.hsbc\.com\.hk$',
+    # Pattern 3: payme subdomain
+    r'^([a-z0-9-]+\.)*payme\.hsbc\.com\.hk$',
+    # Pattern 4: payme with prefix
+    r'^payme-([a-z0-9-]+)\.hsbc\.com\.hk$',
+    # Pattern 5-7: Hang Seng domains
+    r'^dit-ob\.hangseng\.com$',
+    r'^ob\.hangseng\.com$',
+    r'^uat-ob\.hangseng\.com$',
+]
 
 def handler(event, context):
     try:
@@ -38,17 +58,31 @@ def handler(event, context):
         method = event.get('httpMethod', 'GET')
         path = event.get('path', '/')
 
-        # Extract headers for custom Host validation
+        # Extract headers for Host validation
         headers = event.get('headers', {})
-        custom_host = (
-            headers.get('X-Custom-Host') or
-            headers.get('x-custom-host') or
-            headers.get('Host') or
-            headers.get('host') or
-            'default-host'
-        )
+        host_header = headers.get('Host') or headers.get('host', 'unknown')
 
-        print(f"Custom Host header: {custom_host}")
+        print(f"Host header received: {host_header}")
+
+        # Validate Host header against allowed patterns
+        host_valid = False
+        matched_pattern = None
+        for pattern in ALLOWED_HOST_PATTERNS:
+            if re.match(pattern, host_header, re.IGNORECASE):
+                host_valid = True
+                matched_pattern = pattern
+                break
+
+        if not host_valid:
+            print(f"Invalid Host header: {host_header}")
+            return response(403, {
+                "error": "Forbidden: Invalid Host header",
+                "host": host_header,
+                "message": "Host header does not match any allowed patterns"
+            })
+
+        print(f"Host validated: {host_header}")
+        custom_host = host_header
 
         # Extract query parameters
         query_params = event.get('queryStringParameters') or {}
@@ -333,6 +367,20 @@ resource "aws_lambda_function" "crud_api" {
   tags = var.common_tags
 }
 
+# Lambda Function URL - Direct access without API Gateway (accepts any Host header)
+resource "aws_lambda_function_url" "crud_api_url" {
+  function_name      = aws_lambda_function.crud_api.function_name
+  authorization_type = "NONE"
+
+  cors {
+    allow_credentials = false
+    allow_origins     = ["*"]
+    allow_methods     = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allow_headers     = ["*"]
+    max_age           = 86400
+  }
+}
+
 # API Gateway
 resource "aws_api_gateway_rest_api" "crud_api" {
   name        = "${var.project_name}-api"
@@ -455,6 +503,11 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 # Outputs
+output "lambda_function_url" {
+  description = "Lambda Function URL - Use this for custom Host header validation"
+  value       = aws_lambda_function_url.crud_api_url.function_url
+}
+
 output "api_gateway_url" {
   description = "API Gateway URL"
   value       = "https://${aws_api_gateway_rest_api.crud_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.api_stage_name}"
