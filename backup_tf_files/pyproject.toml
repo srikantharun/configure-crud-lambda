@@ -1,0 +1,32 @@
+[project]
+name = "waf-policy-tests"
+version = "1.0.0"
+description = "WAF policy testing for terraform-aws-fms-policies"
+requires-python = ">=3.9"
+
+dependencies = [
+    "pytest",
+    "pyyaml",
+    "pydantic",
+    "requests"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest-html"
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["tests*","waf*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+filterwarnings = [
+     "ignore::DeprecationWarning:certifi.*",
+     "ignore::pytest.PytestCollectionWarning",
+]
