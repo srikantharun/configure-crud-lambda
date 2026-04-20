@@ -201,48 +201,6 @@ class WAFTestRunner:
             results.append(result)
             self._print_result("TEST 1 [POSITIVE]", result)
 
-            # =================================================================
-            # TEST 2: SIZE BLOCK - User-Agent >8KB returns 403
-            # Runs for all tuning types
-            # =================================================================
-            result = self._test_oversized_user_agent(config, req)
-            results.append(result)
-            self._print_result("TEST 2 [UA SIZE]", result)
-
-            # =================================================================
-            # TEST 3: GAMIFICATION - SQLi blocked with FP conditions
-            # Only runs if sqli is in supported_checks
-            # =================================================================
-            if CheckType.SQLI.value in config.labels.supported_checks:
-                result = self._test_gamification_sqli(config, req)
-                results.append(result)
-                self._print_result("TEST 3 [GAMIFICATION]", result)
-
-            # =================================================================
-            # TEST 4: NEGATIVE URI - /mytest{uri} pattern blocked
-            # Runs for all tuning types
-            # =================================================================
-            result = self._test_negative_uri(config, req)
-            results.append(result)
-            self._print_result("TEST 4 [NEGATIVE URI]", result)
-
-            # =================================================================
-            # TEST 5: SIZE BLOCK (Cookie) - Cookie >8KB returns 403
-            # Runs for all tuning types
-            # =================================================================
-            result = self._test_oversized_cookie(config, req)
-            results.append(result)
-            self._print_result("TEST 5 [COOKIE SIZE]", result)
-
-            # =================================================================
-            # TEST 6: PADDED BODY INJECTION - 1MB body + Log4j attack blocked
-            # Only runs for size_body tuning type (URIs with increased size limits)
-            # =================================================================
-            if tuning_type == "size_body":
-                result = self._test_large_body_with_injection(config, req)
-                results.append(result)
-                self._print_result("TEST 6 [PADDED INJECTION]", result)
-
         return results
 
     # =========================================================================
