@@ -15,6 +15,7 @@ Note on CloudFront bug:
 """
 from __future__ import annotations
 
+import json
 import os
 import time
 import yaml
@@ -267,7 +268,7 @@ class WAFTestRunner:
         elif tuning_type == "xss":
             # Send XSS-like content that should be allowed (in body for POST)
             if req.test_config.test_payload:
-                body = f'{{"content": "{req.test_config.test_payload}"}}'
+                body = json.dumps({"content": req.test_config.test_payload})
             else:
                 body = '{"content": "<div class=\'user-content\'>Test</div>"}'
 
@@ -276,7 +277,7 @@ class WAFTestRunner:
             if req.test_config.test_query:
                 uri = f"{req.uri}?{req.test_config.test_query}"
             elif req.test_config.test_payload:
-                body = f'{{"query": "{req.test_config.test_payload}"}}'
+                body = json.dumps({"query": req.test_config.test_payload})
 
         # winshell and default: standard request with no special payload
 
