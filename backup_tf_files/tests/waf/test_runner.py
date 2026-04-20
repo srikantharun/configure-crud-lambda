@@ -289,7 +289,18 @@ class WAFTestRunner:
         )
 
         start_time = datetime.utcnow()
-        response = self.http.send(request)
+        max_retries = 2
+        retry_delay = 15  # seconds to wait before retry on 502
+
+        for attempt in range(max_retries + 1):
+            response = self.http.send(request)
+            if response.status_code != 502:
+                break
+            if attempt < max_retries:
+                print(f"    ⚠ Got 502 on attempt {attempt + 1}, retrying in {retry_delay}s...")
+                time.sleep(retry_delay)
+            else:
+                print(f"    ⚠ Got 502 on all {max_retries + 1} attempts")
 
         if response.error:
             return TestResult(
