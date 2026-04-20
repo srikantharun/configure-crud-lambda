@@ -178,8 +178,8 @@ class WAFTestRunner:
         """
         results = []
         batch_size = 20
-        batch_pause_seconds = 20
-        per_request_delay = 2
+        batch_pause_seconds = 30
+        per_request_delay = 10
 
         for idx, req in enumerate(config.requirements):
             # Pause every batch_size tests to avoid 502s from connection saturation
