@@ -178,7 +178,8 @@ class WAFTestRunner:
         """
         results = []
         batch_size = 20
-        batch_pause_seconds = 10
+        batch_pause_seconds = 20
+        per_request_delay = 2
 
         for idx, req in enumerate(config.requirements):
             # Pause every batch_size tests to avoid 502s from connection saturation
@@ -189,6 +190,9 @@ class WAFTestRunner:
             tuning_type = req.tuning_type or "size_body"  # Default to size_body
             print(f"\n  Requirement: {req.id} [{tuning_type}] ({req.uri})")
 
+            if idx > 0:
+               time.sleep(per_request_delay)
+                
             # =================================================================
             # TEST 1: POSITIVE - Valid request allowed with FP label
             # Behavior varies by tuning_type
