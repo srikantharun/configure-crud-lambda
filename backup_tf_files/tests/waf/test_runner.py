@@ -255,7 +255,8 @@ class WAFTestRunner:
         """
         test_id = f"{req.id}:positive"
         tuning_type = req.tuning_type or "size_body"
-
+        expected_action = req.test_config.expected_action or "ALLOW"
+        
         # Build base request
         uri = req.uri
         body = None
