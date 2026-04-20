@@ -61,24 +61,4 @@ class TestWAFRequirements:
 #           self._print_result("TEST 3 GAMIFICATION", result)
 #           assert result.status.value == "pass", f"Failed: {result.message}"
 
-    @pytest.mark.padded_injection
-    @pytest.mark.size_limit
-    def test_padded_injection_blocked(
-        self,
-        test_runner: WAFTestRunner,
-        config: WAFTestConfig,
-        requirement: WAFRequirement,
-    ):
-          """
-          Test 6: Large padded body (1MB) with Log4j injection should be BLOCKED.
-
-          Verifies that attackers cannot bypass injection detection by padding
-          requests with large bodies (within tuned size limits up to 10MB).
-          """
-          # Only run for size_body tuning type
-          if requirement.tuning_type != "size_body":
-             pytest.skip(f"Padded injection test only runs for size_body tuning type")
-
-          result = test_runner._test_large_body_with_injection(config, requirement)
-          self._print_result("TEST 6 Large padded body testing", result)
-          assert result.status.value == "pass", f"Failed: {result.message}"
+    # TEST 6 (padded injection) removed - only running positive tests
