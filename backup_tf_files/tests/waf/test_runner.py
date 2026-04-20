@@ -177,8 +177,8 @@ class WAFTestRunner:
                that Log4j attacks are blocked even with 1MB padded body.
         """
         results = []
-        batch_size = 10
-        batch_pause_seconds = 30
+        batch_size = 5
+        batch_pause_seconds = 60
         per_request_delay = 10
 
         for idx, req in enumerate(config.requirements):
