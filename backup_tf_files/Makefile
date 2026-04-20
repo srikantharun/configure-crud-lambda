@@ -60,6 +60,11 @@ test-report:
 	@mkdir -p reports
 	pytest tests/waf/ -v --waf-endpoint=$(WAF_ENDPOINT) --waf-log-group=$(WAF_LOG_GROUP) --aws-region=$(AWS_REGION) --account-id=$(AWS_ACCOUNT_ID) --waf-module=$(MODULE) --html=reports/$(MODULE).html --junitxml=reports/$(MODULE)_junit.xml
 
+test-json:
+	@test -n "$(MODULE)" || (echo "ERROR: MODULE required"; exit 1)
+	@mkdir -p reports
+	pytest tests/waf/ -v -s --tb=short --waf-endpoint=$(WAF_ENDPOINT) --waf-log-group=$(WAF_LOG_GROUP) --aws-region=$(AWS_REGION) --account-id=$(AWS_ACCOUNT_ID) --waf-module=$(MODULE) --json-report=reports/$(MODULE).json
+
 test-coverage:
 	@test -n "$(MODULE)" || (echo "ERROR: MODULE required"; exit 1)
 	@mkdir -p reports
@@ -75,4 +80,5 @@ help:
 	@echo "make test-install	  Install dependencies"
 	@echo "make test-clean		  Clean artifacts"
 	@echo "make test MODULE=xxx	  Run tests"
-	@echo "make test-report MODULE=xxx  Generate report"
+	@echo "make test-report MODULE=xxx  Generate HTML report"
+	@echo "make test-json MODULE=xxx   Generate JSON report (for ML training)"

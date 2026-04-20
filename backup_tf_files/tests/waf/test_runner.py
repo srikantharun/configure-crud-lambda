@@ -285,6 +285,22 @@ class WAFTestRunner:
                 message=f"HTTP error: {response.error}",
             )
 
+        # 502 after all retries = WAF gap (payload bypassed WAF and crashed backend)
+        if response.status_code == 502:
+            return TestResult(
+                test_id=test_id,
+                requirement_id=req.id,
+                policy_name=config.policy.name,
+                status=TestStatus.FAIL,
+                test_type="positive",
+                expected_action=expected_action,
+                actual_action="BACKEND_CRASH",
+                http_status=502,
+                request_id=request.request_id,
+                message="WAF GAP: Payload reached backend and caused 502 (not blocked by WAF)",
+                duration_ms=response.duration_ms,
+            )
+
         # If expected_action is BLOCK, a 403 is a PASS
         if expected_action == "BLOCK":
             if response.status_code == 403:
@@ -491,6 +507,67 @@ class WAFTestRunner:
             for f in failures:
                 print(f"  FAIL {f.test_id}")
                 print(f"    {f.message}")
+
+    def export_json_report(self, report: CoverageReport, output_path: str):
+        """Export test results as JSON for ML training pipeline."""
+        from datetime import datetime as dt
+
+        results_data = []
+        for r in report.results:
+            results_data.append({
+                "test_id": r.test_id,
+                "requirement_id": r.requirement_id,
+                "policy_name": r.policy_name,
+                "status": r.status.value,
+                "test_type": r.test_type,
+                "expected_action": r.expected_action,
+                "actual_action": r.actual_action,
+                "http_status": r.http_status,
+                "request_id": r.request_id,
+                "expected_labels": r.expected_labels,
+                "actual_labels": r.actual_labels,
+                "message": r.message,
+                "duration_ms": r.duration_ms,
+            })
+
+        # Build requirement metadata from configs
+        requirements_meta = []
+        for policy_name, config in self.configs.items():
+            for req in config.requirements:
+                requirements_meta.append({
+                    "requirement_id": req.id,
+                    "policy_name": policy_name,
+                    "tuning_type": req.tuning_type,
+                    "uri": req.uri,
+                    "method": req.method,
+                    "host": req.host,
+                    "has_xss_fp_label": req.fp_labels.xss is not None,
+                    "has_sqli_fp_label": req.fp_labels.sqli is not None,
+                    "has_size_fp_label": req.fp_labels.size is not None,
+                    "has_test_payload": req.test_config.test_payload is not None,
+                    "expected_action": req.test_config.expected_action,
+                })
+
+        json_report = {
+            "timestamp": dt.utcnow().isoformat() + "Z",
+            "waf_endpoint": self.waf_endpoint,
+            "summary": {
+                "policy": report.policy_name,
+                "total_requirements": report.total_requirements,
+                "tested": report.tested_requirements,
+                "passed": report.passed_requirements,
+                "failed": report.failed_requirements,
+                "pass_rate": round(report.pass_rate, 2),
+                "coverage_percent": round(report.coverage_percent, 2),
+            },
+            "results": results_data,
+            "requirements_metadata": requirements_meta,
+        }
+
+        with open(output_path, "w") as f:
+            json.dump(json_report, f, indent=2)
+
+        print(f"\nJSON report exported to: {output_path}")
 
     def close(self):
         """Clean up."""

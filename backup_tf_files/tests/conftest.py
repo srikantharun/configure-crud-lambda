@@ -20,6 +20,12 @@ MODULES_ROOT = Path(__file__).parent.parent / "modules"
 def pytest_addoption(parser):
     """Add custom CLI options for WAF testing."""
     parser.addoption(
+        "--json-report",
+        action="store",
+        default=None,
+        help="Path to export JSON test results (e.g., reports/results.json)",
+    )
+    parser.addoption(
         "--waf-module",
         action="store",
         default=None,
@@ -120,6 +126,25 @@ def test_runner(session_config) -> Iterator[WAFTestRunner]:
     runner.discover_configs()
     yield runner
     runner.close()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def json_report_export(request, test_runner, session_config):
+    """Auto-export JSON report after all tests if --json-report is set."""
+    yield
+    json_path = request.config.getoption("--json-report")
+    if json_path:
+        module_filter = session_config.get("module_filter")
+        report = test_runner._generate_coverage_report(
+            module_filter or "all",
+            test_runner.results if test_runner.results else [],
+            sum(len(c.requirements) for c in test_runner.configs.values()),
+        )
+        # Collect results from the test runner's stored results
+        # Results are stored in _run_policy_tests, so we re-generate from configs
+        if not report.results:
+            report = test_runner.run_all_tests(policy_filter=module_filter)
+        test_runner.export_json_report(report, json_path)
 
 
 def discover_configs(module_filter: str=None) -> list[tuple[WAFTestConfig, str]]:
