@@ -256,7 +256,7 @@ class WAFTestRunner:
         test_id = f"{req.id}:positive"
         tuning_type = req.tuning_type or "size_body"
         expected_action = req.test_config.expected_action or "ALLOW"
-        
+
         # Build base request
         uri = req.uri
         body = None
@@ -328,11 +328,41 @@ class WAFTestRunner:
                 policy_name=config.policy.name,
                 status=TestStatus.ERROR,
                 test_type="positive",
-                expected_action="ALLOW",
+                expected_action=expected_action,
                 message=f"HTTP error: {response.error}",
             )
 
-        # Query CloudWatch for label verification
+        # If expected_action is BLOCK, a 403 is a PASS
+        if expected_action == "BLOCK":
+            if response.status_code == 403:
+                return TestResult(
+                    test_id=test_id,
+                    requirement_id=req.id,
+                    policy_name=config.policy.name,
+                    status=TestStatus.PASS,
+                    test_type="positive",
+                    expected_action="BLOCK",
+                    actual_action="BLOCK",
+                    http_status=response.status_code,
+                    request_id=request.request_id,
+                    message=f"Correctly blocked (403)",
+                    duration_ms=response.duration_ms,
+                )
+            else:
+                return TestResult(
+                    test_id=test_id,
+                    requirement_id=req.id,
+                    policy_name=config.policy.name,
+                    status=TestStatus.FAIL,
+                    test_type="positive",
+                    expected_action="BLOCK",
+                    actual_action="ALLOW",
+                    http_status=response.status_code,
+                    request_id=request.request_id,
+                    message=f"Expected BLOCK but got {response.status_code}",
+                )
+
+        # Query CloudWatch for label verification (ALLOW path)
         log_entry = self.cw.find_log_by_request_id(request.request_id, start_time)
 
         # Select appropriate FP label based on tuning_type
