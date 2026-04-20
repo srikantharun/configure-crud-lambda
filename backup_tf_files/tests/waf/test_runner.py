@@ -177,8 +177,15 @@ class WAFTestRunner:
                that Log4j attacks are blocked even with 1MB padded body.
         """
         results = []
+        batch_size = 20
+        batch_pause_seconds = 10
 
-        for req in config.requirements:
+        for idx, req in enumerate(config.requirements):
+            # Pause every batch_size tests to avoid 502s from connection saturation
+            if idx > 0 and idx % batch_size == 0:
+                print(f"\n  --- Pausing {batch_pause_seconds}s after {idx} tests to avoid 502 ---")
+                time.sleep(batch_pause_seconds)
+
             tuning_type = req.tuning_type or "size_body"  # Default to size_body
             print(f"\n  Requirement: {req.id} [{tuning_type}] ({req.uri})")
 
