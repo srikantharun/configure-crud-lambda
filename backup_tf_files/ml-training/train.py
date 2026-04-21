@@ -69,7 +69,8 @@ def train_xgboost(
         verbose=False,
     )
 
-    print(f"XGBoost trained: {model.n_estimators} estimators, best iteration: {model.best_iteration}")
+    best_iter = getattr(model, "best_iteration", model.n_estimators)
+    print(f"XGBoost trained: {model.n_estimators} estimators, best iteration: {best_iter}")
     return model
 
 
