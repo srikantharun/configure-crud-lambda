@@ -1,0 +1,73 @@
+{
+  "base_value": 1.7911,
+  "num_samples": 52,
+  "global_feature_importance": [
+    {
+      "feature": "http_status",
+      "mean_abs_shap": 2.2489
+    },
+    {
+      "feature": "duration_ms",
+      "mean_abs_shap": 0.4999
+    },
+    {
+      "feature": "has_xss_fp_label",
+      "mean_abs_shap": 0.0275
+    },
+    {
+      "feature": "uri_depth",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "uri_length",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "has_api_prefix",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "has_sqli_fp_label",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "has_size_fp_label",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "has_actual_labels",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "num_actual_labels",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "tuning_type_encoded",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "method_encoded",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "expected_block",
+      "mean_abs_shap": 0.0
+    }
+  ],
+  "evasion_drivers": [],
+  "blocking_drivers": [
+    {
+      "feature": "http_status",
+      "mean_shap": 1.1261
+    },
+    {
+      "feature": "duration_ms",
+      "mean_shap": 0.1638
+    }
+  ],
+  "insights": [
+    "Most important feature: 'http_status' (mean |SHAP| = 2.2489)",
+    "No strong evasion patterns detected \u2014 WAF rules appear well-tuned"
+  ]
+}
