@@ -244,11 +244,14 @@ class WAFTestRunner:
                 body = '<div class="user-content">Test</div>'
 
         elif tuning_type == "sqli":
-            # Send SQLi payload as raw body for WAF inspection
+            # Send SQLi payload in query string AND body for WAF inspection
             if req.test_config.test_query:
                 uri = f"{req.uri}?{req.test_config.test_query}"
             elif req.test_config.test_payload:
-                body = req.test_config.test_payload
+                # Query string — triggers SQLi_QUERYSTRING detection
+                uri = f"{req.uri}?q={req.test_config.test_payload}"
+                # Body — triggers SQLi_Body detection
+                body = json.dumps({"search": req.test_config.test_payload})
 
         # winshell and default: standard request with no special payload
 
