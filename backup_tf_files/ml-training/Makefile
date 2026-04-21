@@ -1,7 +1,7 @@
 REPORTS_DIR ?= ../reports
 OUTPUT_DIR ?= output
 
-.PHONY: install train train-single compare clean help
+.PHONY: install train train-single analyze analyze-full compare clean help
 
 install:
 	pip install -r requirements.txt
@@ -21,6 +21,17 @@ compare:
 	@test -n "$(FILES)" || (echo "ERROR: FILES required. Example: make compare FILES='../reports/v1.json ../reports/v2.json ../reports/v3.json'"; exit 1)
 	python flow.py --compare $(FILES) --output-dir $(OUTPUT_DIR)
 
+## Quick analytics — no ML, just clear facts
+analyze:
+	@test -n "$(REPORT)" || (echo "ERROR: REPORT required. Example: make analyze REPORT=../reports/test_custom_v3.json"; exit 1)
+	python analyze.py --report-file $(REPORT) --output-dir $(OUTPUT_DIR)
+
+## Full analytics with payload details (needs waf_requirements.yaml)
+analyze-full:
+	@test -n "$(REPORT)" || (echo "ERROR: REPORT required"; exit 1)
+	@test -n "$(YAML)" || (echo "ERROR: YAML required. Example: make analyze-full REPORT=../reports/test.json YAML=../modules/test_custom_v3/waf_requirements.yaml"; exit 1)
+	python analyze.py --report-file $(REPORT) --yaml-file $(YAML) --output-dir $(OUTPUT_DIR)
+
 clean:
 	rm -rf output/* __pycache__ .prefect
 
@@ -31,6 +42,8 @@ help:
 	@echo "  make install                          Install dependencies"
 	@echo "  make train                            Train on all reports in reports/"
 	@echo "  make train-single REPORT=path.json    Train on a single report"
+	@echo "  make analyze REPORT=path.json         Quick analytics (no ML)"
+	@echo "  make analyze-full REPORT=x YAML=y     Full analytics with payloads"
 	@echo "  make compare FILES='v1.json v2.json'  Compare policy versions"
 	@echo "  make clean                            Clean output"
 	@echo ""

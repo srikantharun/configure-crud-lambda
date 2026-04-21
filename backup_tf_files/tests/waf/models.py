@@ -102,6 +102,11 @@ class TuningType(str, Enum):
     XSS = "xss"
     SQLI = "sqli"
     WINSHELL = "winshell"
+    CMDI = "cmdi"
+    LFI = "lfi"
+    RFI = "rfi"
+    SSTI = "ssti"
+    BASE64 = "base64"
 
 
 class WAFRequirement(BaseModel):

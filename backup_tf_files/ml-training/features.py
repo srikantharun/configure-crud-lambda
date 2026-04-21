@@ -240,11 +240,16 @@ def build_policy_summary(df: pd.DataFrame) -> pd.DataFrame:
         # Coverage by tuning type
         num_xss=("tuning_type", lambda x: (x == "xss").sum()),
         num_sqli=("tuning_type", lambda x: (x == "sqli").sum()),
+        num_cmdi=("tuning_type", lambda x: (x == "cmdi").sum()),
+        num_lfi=("tuning_type", lambda x: (x == "lfi").sum()),
+        num_rfi=("tuning_type", lambda x: (x == "rfi").sum()),
+        num_ssti=("tuning_type", lambda x: (x == "ssti").sum()),
+        num_base64=("tuning_type", lambda x: (x == "base64").sum()),
         num_size_body=("tuning_type", lambda x: (x == "size_body").sum()),
     ).reset_index()
 
     # Block rate per tuning type
-    for tt in ["xss", "sqli", "size_body"]:
+    for tt in ["xss", "sqli", "cmdi", "lfi", "rfi", "ssti", "base64", "size_body"]:
         subset = df[df["tuning_type"] == tt]
         if not subset.empty:
             rates = subset.groupby("policy_name")["is_blocked"].mean().reset_index()

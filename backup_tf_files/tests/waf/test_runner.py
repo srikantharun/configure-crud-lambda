@@ -159,22 +159,10 @@ class WAFTestRunner:
     def _run_policy_tests(self, config: WAFTestConfig) -> list[TestResult]:
         """Run TEST 1 (positive) for each requirement."""
         results = []
-        batch_size = 12
-        batch_pause_seconds = 60
-        per_request_delay = 10  # seconds between each test
 
         for idx, req in enumerate(config.requirements):
-            # Pause every batch_size tests to avoid 502s from connection saturation
-            if idx > 0 and idx % batch_size == 0:
-                print(f"\n  --- Pausing {batch_pause_seconds}s after {idx} tests to avoid 502 ---")
-                time.sleep(batch_pause_seconds)
-
             tuning_type = req.tuning_type or "size_body"  # Default to size_body
             print(f"\n  Requirement: {req.id} [{tuning_type}] ({req.uri})")
-
-            # Small delay between each request to avoid overwhelming the backend
-            if idx > 0:
-                time.sleep(per_request_delay)
 
             # =================================================================
             # TEST 1: POSITIVE - Fire payload, expect BLOCK (403)
@@ -253,6 +241,36 @@ class WAFTestRunner:
                 # Body — triggers SQLi_Body detection
                 body = json.dumps({"search": req.test_config.test_payload})
 
+        elif tuning_type == "cmdi":
+            # Command injection — send in query string and body
+            if req.test_config.test_payload:
+                uri = f"{req.uri}?cmd={req.test_config.test_payload}"
+                body = req.test_config.test_payload
+
+        elif tuning_type == "lfi":
+            # Local file inclusion — send as path in query string
+            if req.test_config.test_payload:
+                uri = f"{req.uri}?file={req.test_config.test_payload}"
+                body = req.test_config.test_payload
+
+        elif tuning_type == "rfi":
+            # Remote file inclusion — send as URL in query string
+            if req.test_config.test_payload:
+                uri = f"{req.uri}?url={req.test_config.test_payload}"
+                body = req.test_config.test_payload
+
+        elif tuning_type == "ssti":
+            # Template injection — send in body and query string
+            if req.test_config.test_payload:
+                uri = f"{req.uri}?template={req.test_config.test_payload}"
+                body = req.test_config.test_payload
+
+        elif tuning_type == "base64":
+            # Base64-encoded payloads — send as-is, WAF should still block
+            if req.test_config.test_payload:
+                uri = f"{req.uri}?data={req.test_config.test_payload}"
+                body = req.test_config.test_payload
+
         # winshell and default: standard request with no special payload
 
         request = WAFRequest(
@@ -264,18 +282,7 @@ class WAFTestRunner:
         )
 
         start_time = datetime.utcnow()
-        max_retries = 2
-        retry_delay = 15  # seconds to wait before retry on 502
-
-        for attempt in range(max_retries + 1):
-            response = self.http.send(request)
-            if response.status_code != 502:
-                break
-            if attempt < max_retries:
-                print(f"    Got 502 on attempt {attempt + 1}, retrying in {retry_delay}s...")
-                time.sleep(retry_delay)
-            else:
-                print(f"    Got 502 on all {max_retries + 1} attempts")
+        response = self.http.send(request)
 
         if response.error:
             return TestResult(

