@@ -94,16 +94,11 @@ def analyze_report(report: dict, requirements: dict = None) -> dict:
         if requirements and req_id in requirements:
             payload = requirements[req_id].get("test_config", {}).get("test_payload", "")
 
-        techniques = detect_evasion_techniques(str(payload)) if payload else []
-        for tech in techniques:
-            evasion_stats[tech] += 1
-
         bypassed_payloads.append({
             "id": req_id,
             "category": tt,
             "http_status": r["http_status"],
             "payload": str(payload)[:100] if payload else "N/A",
-            "evasion_techniques": techniques,
             "reason": r.get("actual_action", "unknown"),
         })
 
@@ -119,9 +114,6 @@ def analyze_report(report: dict, requirements: dict = None) -> dict:
             "block_rate": round(counts["blocked"] / total * 100, 1) if total > 0 else 0,
         }
 
-    # Top evasion techniques
-    evasion_ranking = sorted(evasion_stats.items(), key=lambda x: x[1], reverse=True)
-
     analysis = {
         "timestamp": datetime.utcnow().isoformat() + "Z",
         "policy": summary.get("policy", "unknown"),
@@ -134,15 +126,14 @@ def analyze_report(report: dict, requirements: dict = None) -> dict:
             "overall_block_rate": round(len(passed) / len(results) * 100, 1) if results else 0,
         },
         "category_breakdown": category_summary,
-        "evasion_techniques_detected": dict(evasion_ranking),
         "bypassed_payloads": bypassed_payloads,
-        "findings": _generate_findings(category_summary, evasion_ranking, crashes),
+        "findings": _generate_findings(category_summary, crashes),
     }
 
     return analysis
 
 
-def _generate_findings(category_summary: dict, evasion_ranking: list, crashes: list) -> list[str]:
+def _generate_findings(category_summary: dict, crashes: list) -> list[str]:
     """Generate clear, actionable findings."""
     findings = []
 
@@ -163,11 +154,6 @@ def _generate_findings(category_summary: dict, evasion_ranking: list, crashes: l
             f"BACKEND CRASH: {total_crashes} payloads caused 502 — "
             f"categories: {', '.join(crash_categories)}"
         )
-
-    # Evasion techniques
-    if evasion_ranking:
-        top_techniques = [f"{name} ({count})" for name, count in evasion_ranking[:5]]
-        findings.append(f"TOP EVASION TECHNIQUES: {', '.join(top_techniques)}")
 
     # Missing rule groups
     missing_rules = []
@@ -237,12 +223,6 @@ def print_analysis(analysis: dict):
     for cat, stats in analysis["category_breakdown"].items():
         print(f"{cat:<12} {stats['total']:>6} {stats['blocked']:>8} {stats['bypassed']:>9} {stats['crashed']:>8} {stats['block_rate']:>6.1f}%")
 
-    if analysis["evasion_techniques_detected"]:
-        print(f"\n{'─' * 70}")
-        print("EVASION TECHNIQUES (in bypassed payloads):")
-        for tech, count in analysis["evasion_techniques_detected"].items():
-            print(f"  {tech:<25} {count} payloads")
-
     print(f"\n{'─' * 70}")
     print("FINDINGS:")
     for i, finding in enumerate(analysis["findings"], 1):
@@ -252,8 +232,7 @@ def print_analysis(analysis: dict):
         print(f"\n{'─' * 70}")
         print(f"BYPASSED PAYLOADS ({len(analysis['bypassed_payloads'])}):")
         for p in analysis["bypassed_payloads"]:
-            techniques = ", ".join(p["evasion_techniques"]) if p["evasion_techniques"] else "none detected"
-            print(f"  {p['id']:<20} [{p['category']:>6}] HTTP:{p['http_status']} evasion:[{techniques}]")
+            print(f"  {p['id']:<20} [{p['category']:>6}] HTTP:{p['http_status']}")
             if p["payload"] != "N/A":
                 print(f"    payload: {p['payload']}")
 

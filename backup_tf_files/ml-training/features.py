@@ -174,9 +174,7 @@ def build_features_from_report(report: dict) -> pd.DataFrame:
             "uri_depth": uri_depth,
             "uri_length": uri_length,
             "has_api_prefix": has_api_prefix,
-            "has_xss_fp_label": 1 if meta.get("has_xss_fp_label") else 0,
-            "has_sqli_fp_label": 1 if meta.get("has_sqli_fp_label") else 0,
-            "has_size_fp_label": 1 if meta.get("has_size_fp_label") else 0,
+            "has_test_payload": 1 if meta.get("has_test_payload") else 0,
             "expected_action": result.get("expected_action", "BLOCK"),
 
             # Response features

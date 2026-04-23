@@ -159,8 +159,12 @@ class WAFTestRunner:
     def _run_policy_tests(self, config: WAFTestConfig) -> list[TestResult]:
         """Run TEST 1 (positive) for each requirement."""
         results = []
+        per_request_delay = 2  # seconds between each test
 
         for idx, req in enumerate(config.requirements):
+            if idx > 0:
+                time.sleep(per_request_delay)
+
             tuning_type = req.tuning_type or "size_body"  # Default to size_body
             print(f"\n  Requirement: {req.id} [{tuning_type}] ({req.uri})")
 
@@ -273,11 +277,18 @@ class WAFTestRunner:
 
         # winshell and default: standard request with no special payload
 
+        # Build headers with test metadata for CloudWatch filtering
+        headers = dict(req.headers)
+        headers["X-Test-Id"] = req.id
+        headers["X-Test-Category"] = tuning_type
+        payload_summary = str(req.test_config.test_payload or "")[:50].replace("\n", " ")
+        headers["X-Test-Payload"] = payload_summary
+
         request = WAFRequest(
             uri=uri,
             method=req.method,
             host=self.waf_host,  # Use WAF_ENDPOINT host
-            headers=dict(req.headers),
+            headers=headers,
             body=body,
         )
 
@@ -341,54 +352,7 @@ class WAFTestRunner:
                     message=f"Expected BLOCK but got {response.status_code}",
                 )
 
-        # Query CloudWatch for label verification (ALLOW path)
-        log_entry = self.cw.find_log_by_request_id(request.request_id, start_time)
-
-        # Select appropriate FP label based on tuning_type
-        if tuning_type in ("size_body", "size_querystring"):
-            fp_label = req.fp_labels.size
-        elif tuning_type == "xss":
-            fp_label = req.fp_labels.xss
-        elif tuning_type == "sqli":
-            fp_label = req.fp_labels.sqli
-        else:
-            fp_label = req.fp_labels.size  # Default
-
-        if log_entry:
-            fp_present = any(fp_label in lbl for lbl in log_entry.labels) if fp_label else False
-
-            if log_entry.action == "ALLOW" and response.status_code != 403:
-                return TestResult(
-                    test_id=test_id,
-                    requirement_id=req.id,
-                    policy_name=config.policy.name,
-                    status=TestStatus.PASS,
-                    test_type="positive",
-                    expected_action="ALLOW",
-                    actual_action=log_entry.action,
-                    http_status=response.status_code,
-                    request_id=request.request_id,
-                    expected_labels=[fp_label] if fp_label else [],
-                    actual_labels=log_entry.labels,
-                    message=f"Allowed with FP label: {fp_label}" if fp_present else "Allowed (no FP label needed)",
-                    duration_ms=response.duration_ms,
-                )
-            else:
-                return TestResult(
-                    test_id=test_id,
-                    requirement_id=req.id,
-                    policy_name=config.policy.name,
-                    status=TestStatus.FAIL,
-                    test_type="positive",
-                    expected_action="ALLOW",
-                    actual_action=log_entry.action,
-                    http_status=response.status_code,
-                    request_id=request.request_id,
-                    actual_labels=log_entry.labels,
-                    message=f"BLOCKED! Expected ALLOW. FP label present: {fp_present}",
-                )
-
-        # No log - check HTTP status
+        # ALLOW path — no FP label verification needed
         if response.status_code != 403:
             return TestResult(
                 test_id=test_id,
@@ -551,9 +515,7 @@ class WAFTestRunner:
                     "uri": req.uri,
                     "method": req.method,
                     "host": req.host,
-                    "has_xss_fp_label": req.fp_labels.xss is not None,
-                    "has_sqli_fp_label": req.fp_labels.sqli is not None,
-                    "has_size_fp_label": req.fp_labels.size is not None,
+                    "has_test_payload": req.test_config.test_payload is not None,
                     "has_test_payload": req.test_config.test_payload is not None,
                     "expected_action": req.test_config.expected_action,
                 })

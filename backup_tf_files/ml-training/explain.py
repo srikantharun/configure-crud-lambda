@@ -196,9 +196,6 @@ def _generate_shap_insights(
             insights.append("Nested/obfuscated tags (e.g., <scr<script>ipt>) reduce WAF detection probability")
         if any("length" in f for f in evasion_features):
             insights.append("Payload length affects detection — very short or very long payloads behave differently")
-        if any("fp_label" in f for f in evasion_features):
-            insights.append("False positive labels may be too broad — some real attacks are being allowed through FP exceptions")
-
     if not evasion_drivers:
         insights.append("No strong evasion patterns detected — WAF rules appear well-tuned")
 
