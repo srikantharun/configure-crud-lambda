@@ -47,7 +47,7 @@ class FalsePositiveNamespaces(BaseModel):
 class PolicyLabels(BaseModel):
     """Label configuration for a WAF policy."""
     detection: DetectionLabels
-    false_positive_namespace: FalsePositiveNamespaces
+    false_positive_namespace: FalsePositiveNamespaces = Field(default_factory=FalsePositiveNamespaces)
     supported_checks: list[str] = Field(default_factory=list)
 
 
