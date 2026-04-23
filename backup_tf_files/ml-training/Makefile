@@ -1,7 +1,12 @@
 REPORTS_DIR ?= ../reports
 OUTPUT_DIR ?= output
 
-.PHONY: install train train-single analyze analyze-full compare clean help
+.PHONY: install train train-single analyze analyze-full validate validate-sample compare clean help
+
+CF_LOG_GROUP ?= aws-waf-logs-baseline13
+CF_REGION ?= us-east-1
+ALB_LOG_GROUP ?= aws-waf-logs-wpb-jenkins
+ALB_REGION ?= eu-west-1
 
 install:
 	pip install -r requirements.txt
@@ -32,6 +37,22 @@ analyze-full:
 	@test -n "$(YAML)" || (echo "ERROR: YAML required. Example: make analyze-full REPORT=../reports/test.json YAML=../modules/test_custom_v3/waf_requirements.yaml"; exit 1)
 	python analyze.py --report-file $(REPORT) --yaml-file $(YAML) --output-dir $(OUTPUT_DIR)
 
+## Validate all results against both CF + ALB WAF logs
+validate:
+	@test -n "$(REPORT)" || (echo "ERROR: REPORT required"; exit 1)
+	python validate.py --report-file $(REPORT) \
+		--cf-log-group $(CF_LOG_GROUP) --cf-region $(CF_REGION) \
+		--alb-log-group $(ALB_LOG_GROUP) --alb-region $(ALB_REGION) \
+		--output-dir $(OUTPUT_DIR)
+
+## Validate failures + sample of passes
+validate-sample:
+	@test -n "$(REPORT)" || (echo "ERROR: REPORT required"; exit 1)
+	python validate.py --report-file $(REPORT) \
+		--cf-log-group $(CF_LOG_GROUP) --cf-region $(CF_REGION) \
+		--alb-log-group $(ALB_LOG_GROUP) --alb-region $(ALB_REGION) \
+		--output-dir $(OUTPUT_DIR) --sample 20
+
 clean:
 	rm -rf output/* __pycache__ .prefect
 
@@ -44,6 +65,8 @@ help:
 	@echo "  make train-single REPORT=path.json    Train on a single report"
 	@echo "  make analyze REPORT=path.json         Quick analytics (no ML)"
 	@echo "  make analyze-full REPORT=x YAML=y     Full analytics with payloads"
+	@echo "  make validate REPORT=path.json        Validate against CF+ALB WAF logs"
+	@echo "  make validate-sample REPORT=path.json  Validate failures + 20 random passes"
 	@echo "  make compare FILES='v1.json v2.json'  Compare policy versions"
 	@echo "  make clean                            Clean output"
 	@echo ""
