@@ -23,7 +23,7 @@ requirements:
 - id: juiceshop-0001
   tuning_type: xss
   description: XSS payload test 1
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -35,7 +35,7 @@ requirements:
 - id: juiceshop-0002
   tuning_type: xss
   description: XSS payload test 2
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -47,7 +47,7 @@ requirements:
 - id: juiceshop-0003
   tuning_type: xss
   description: XSS payload test 3
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -59,7 +59,7 @@ requirements:
 - id: juiceshop-0004
   tuning_type: xss
   description: XSS payload test 4
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -71,7 +71,7 @@ requirements:
 - id: juiceshop-0005
   tuning_type: xss
   description: XSS payload test 5
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -83,7 +83,7 @@ requirements:
 - id: juiceshop-0006
   tuning_type: xss
   description: XSS payload test 6
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -95,7 +95,7 @@ requirements:
 - id: juiceshop-0007
   tuning_type: xss
   description: XSS payload test 7
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -107,7 +107,7 @@ requirements:
 - id: juiceshop-0008
   tuning_type: xss
   description: XSS payload test 8
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -119,7 +119,7 @@ requirements:
 - id: juiceshop-0009
   tuning_type: xss
   description: XSS payload test 9
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -131,7 +131,7 @@ requirements:
 - id: juiceshop-0010
   tuning_type: xss
   description: XSS payload test 10
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -143,7 +143,7 @@ requirements:
 - id: juiceshop-0011
   tuning_type: xss
   description: XSS payload test 11
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -155,7 +155,7 @@ requirements:
 - id: juiceshop-0012
   tuning_type: xss
   description: XSS payload test 12
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -167,7 +167,7 @@ requirements:
 - id: juiceshop-0013
   tuning_type: xss
   description: XSS payload test 13
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -179,7 +179,7 @@ requirements:
 - id: juiceshop-0014
   tuning_type: xss
   description: XSS payload test 14
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -191,7 +191,7 @@ requirements:
 - id: juiceshop-0015
   tuning_type: xss
   description: XSS payload test 15
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -203,7 +203,7 @@ requirements:
 - id: juiceshop-0016
   tuning_type: xss
   description: XSS payload test 16
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -215,7 +215,7 @@ requirements:
 - id: juiceshop-0017
   tuning_type: xss
   description: XSS payload test 17
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -227,7 +227,7 @@ requirements:
 - id: juiceshop-0018
   tuning_type: xss
   description: XSS payload test 18
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -239,7 +239,7 @@ requirements:
 - id: juiceshop-0019
   tuning_type: xss
   description: XSS payload test 19
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -251,7 +251,7 @@ requirements:
 - id: juiceshop-0020
   tuning_type: xss
   description: XSS payload test 20
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -263,7 +263,7 @@ requirements:
 - id: juiceshop-0021
   tuning_type: xss
   description: XSS payload test 21
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -275,7 +275,7 @@ requirements:
 - id: juiceshop-0022
   tuning_type: xss
   description: XSS payload test 22
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -287,7 +287,7 @@ requirements:
 - id: juiceshop-0023
   tuning_type: xss
   description: XSS payload test 23
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -299,7 +299,7 @@ requirements:
 - id: juiceshop-0024
   tuning_type: xss
   description: XSS payload test 24
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -311,7 +311,7 @@ requirements:
 - id: juiceshop-0025
   tuning_type: xss
   description: XSS payload test 25
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -323,7 +323,7 @@ requirements:
 - id: juiceshop-0026
   tuning_type: xss
   description: XSS payload test 26
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -335,7 +335,7 @@ requirements:
 - id: juiceshop-0027
   tuning_type: xss
   description: XSS payload test 27
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -347,7 +347,7 @@ requirements:
 - id: juiceshop-0028
   tuning_type: xss
   description: XSS payload test 28
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -359,7 +359,7 @@ requirements:
 - id: juiceshop-0029
   tuning_type: xss
   description: XSS payload test 29
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -371,7 +371,7 @@ requirements:
 - id: juiceshop-0030
   tuning_type: xss
   description: XSS payload test 30
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -383,7 +383,7 @@ requirements:
 - id: juiceshop-0031
   tuning_type: xss
   description: XSS payload test 31
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -395,7 +395,7 @@ requirements:
 - id: juiceshop-0032
   tuning_type: xss
   description: XSS payload test 32
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -407,7 +407,7 @@ requirements:
 - id: juiceshop-0033
   tuning_type: xss
   description: XSS payload test 33
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -419,7 +419,7 @@ requirements:
 - id: juiceshop-0034
   tuning_type: xss
   description: XSS payload test 34
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -431,7 +431,7 @@ requirements:
 - id: juiceshop-0035
   tuning_type: xss
   description: XSS payload test 35
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -443,7 +443,7 @@ requirements:
 - id: juiceshop-0036
   tuning_type: base64
   description: XSS payload test 36
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -455,7 +455,7 @@ requirements:
 - id: juiceshop-0037
   tuning_type: xss
   description: XSS payload test 37
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -467,7 +467,7 @@ requirements:
 - id: juiceshop-0038
   tuning_type: xss
   description: XSS payload test 38
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -479,7 +479,7 @@ requirements:
 - id: juiceshop-0039
   tuning_type: xss
   description: XSS payload test 39
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -491,7 +491,7 @@ requirements:
 - id: juiceshop-0040
   tuning_type: xss
   description: XSS payload test 40
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -503,7 +503,7 @@ requirements:
 - id: juiceshop-0041
   tuning_type: sqli
   description: SQLi payload test 41
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -515,7 +515,7 @@ requirements:
 - id: juiceshop-0042
   tuning_type: sqli
   description: SQLi payload test 42
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -527,7 +527,7 @@ requirements:
 - id: juiceshop-0043
   tuning_type: sqli
   description: SQLi payload test 43
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -539,7 +539,7 @@ requirements:
 - id: juiceshop-0044
   tuning_type: sqli
   description: SQLi payload test 44
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -551,7 +551,7 @@ requirements:
 - id: juiceshop-0045
   tuning_type: sqli
   description: SQLi payload test 45
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -563,7 +563,7 @@ requirements:
 - id: juiceshop-0046
   tuning_type: sqli
   description: SQLi payload test 46
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -575,7 +575,7 @@ requirements:
 - id: juiceshop-0047
   tuning_type: sqli
   description: SQLi payload test 47
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -587,7 +587,7 @@ requirements:
 - id: juiceshop-0048
   tuning_type: sqli
   description: SQLi payload test 48
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -599,7 +599,7 @@ requirements:
 - id: juiceshop-0049
   tuning_type: sqli
   description: SQLi payload test 49
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -611,7 +611,7 @@ requirements:
 - id: juiceshop-0050
   tuning_type: sqli
   description: SQLi payload test 50
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -623,7 +623,7 @@ requirements:
 - id: juiceshop-0051
   tuning_type: sqli
   description: SQLi payload test 51
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -635,7 +635,7 @@ requirements:
 - id: juiceshop-0052
   tuning_type: sqli
   description: SQLi payload test 52
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -647,7 +647,7 @@ requirements:
 - id: juiceshop-0053
   tuning_type: sqli
   description: SQLi payload test 53
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -659,7 +659,7 @@ requirements:
 - id: juiceshop-0054
   tuning_type: sqli
   description: SQLi payload test 54
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -671,7 +671,7 @@ requirements:
 - id: juiceshop-0055
   tuning_type: sqli
   description: SQLi payload test 55
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -683,7 +683,7 @@ requirements:
 - id: juiceshop-0056
   tuning_type: sqli
   description: SQLi payload test 56
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -695,7 +695,7 @@ requirements:
 - id: juiceshop-0057
   tuning_type: xss
   description: XSS payload test 57
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -707,7 +707,7 @@ requirements:
 - id: juiceshop-0058
   tuning_type: xss
   description: XSS payload test 58
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -719,7 +719,7 @@ requirements:
 - id: juiceshop-0059
   tuning_type: sqli
   description: SQLi payload test 59
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -731,7 +731,7 @@ requirements:
 - id: juiceshop-0060
   tuning_type: sqli
   description: SQLi payload test 60
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -743,7 +743,7 @@ requirements:
 - id: juiceshop-0061
   tuning_type: sqli
   description: SQLi payload test 61
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -755,7 +755,7 @@ requirements:
 - id: juiceshop-0062
   tuning_type: sqli
   description: SQLi payload test 62
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -767,7 +767,7 @@ requirements:
 - id: juiceshop-0063
   tuning_type: sqli
   description: SQLi payload test 63
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -779,7 +779,7 @@ requirements:
 - id: juiceshop-0064
   tuning_type: sqli
   description: SQLi payload test 64
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -791,7 +791,7 @@ requirements:
 - id: juiceshop-0065
   tuning_type: sqli
   description: SQLi payload test 65
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -803,7 +803,7 @@ requirements:
 - id: juiceshop-0066
   tuning_type: sqli
   description: SQLi payload test 66
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -815,7 +815,7 @@ requirements:
 - id: juiceshop-0067
   tuning_type: sqli
   description: SQLi payload test 67
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -827,7 +827,7 @@ requirements:
 - id: juiceshop-0068
   tuning_type: sqli
   description: SQLi payload test 68
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -839,7 +839,7 @@ requirements:
 - id: juiceshop-0069
   tuning_type: sqli
   description: SQLi payload test 69
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -851,7 +851,7 @@ requirements:
 - id: juiceshop-0070
   tuning_type: sqli
   description: SQLi payload test 70
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -863,7 +863,7 @@ requirements:
 - id: juiceshop-0071
   tuning_type: sqli
   description: SQLi payload test 71
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -875,7 +875,7 @@ requirements:
 - id: juiceshop-0072
   tuning_type: sqli
   description: SQLi payload test 72
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -887,7 +887,7 @@ requirements:
 - id: juiceshop-0073
   tuning_type: sqli
   description: SQLi payload test 73
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -899,7 +899,7 @@ requirements:
 - id: juiceshop-0074
   tuning_type: sqli
   description: SQLi payload test 74
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -911,7 +911,7 @@ requirements:
 - id: juiceshop-0075
   tuning_type: sqli
   description: SQLi payload test 75
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -923,7 +923,7 @@ requirements:
 - id: juiceshop-0076
   tuning_type: sqli
   description: SQLi payload test 76
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -935,7 +935,7 @@ requirements:
 - id: juiceshop-0077
   tuning_type: sqli
   description: SQLi payload test 77
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -947,7 +947,7 @@ requirements:
 - id: juiceshop-0078
   tuning_type: sqli
   description: SQLi payload test 78
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -959,7 +959,7 @@ requirements:
 - id: juiceshop-0079
   tuning_type: sqli
   description: SQLi payload test 79
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -971,7 +971,7 @@ requirements:
 - id: juiceshop-0080
   tuning_type: sqli
   description: SQLi payload test 80
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -983,7 +983,7 @@ requirements:
 - id: juiceshop-0081
   tuning_type: sqli
   description: SQLi payload test 81
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -995,7 +995,7 @@ requirements:
 - id: juiceshop-0082
   tuning_type: sqli
   description: SQLi payload test 82
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1007,7 +1007,7 @@ requirements:
 - id: juiceshop-0083
   tuning_type: sqli
   description: SQLi payload test 83
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1019,7 +1019,7 @@ requirements:
 - id: juiceshop-0084
   tuning_type: sqli
   description: SQLi payload test 84
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1031,7 +1031,7 @@ requirements:
 - id: juiceshop-0085
   tuning_type: sqli
   description: SQLi payload test 85
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1043,7 +1043,7 @@ requirements:
 - id: juiceshop-0086
   tuning_type: sqli
   description: SQLi payload test 86
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1055,7 +1055,7 @@ requirements:
 - id: juiceshop-0087
   tuning_type: sqli
   description: SQLi payload test 87
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1067,7 +1067,7 @@ requirements:
 - id: juiceshop-0088
   tuning_type: sqli
   description: SQLi payload test 88
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1079,7 +1079,7 @@ requirements:
 - id: juiceshop-0089
   tuning_type: sqli
   description: SQLi payload test 89
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1091,7 +1091,7 @@ requirements:
 - id: juiceshop-0090
   tuning_type: sqli
   description: SQLi payload test 90
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1103,7 +1103,7 @@ requirements:
 - id: juiceshop-0091
   tuning_type: sqli
   description: SQLi payload test 91
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1115,7 +1115,7 @@ requirements:
 - id: juiceshop-0092
   tuning_type: sqli
   description: SQLi payload test 92
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1127,7 +1127,7 @@ requirements:
 - id: juiceshop-0093
   tuning_type: sqli
   description: SQLi payload test 93
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1139,7 +1139,7 @@ requirements:
 - id: juiceshop-0094
   tuning_type: sqli
   description: SQLi payload test 94
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1151,7 +1151,7 @@ requirements:
 - id: juiceshop-0095
   tuning_type: sqli
   description: SQLi payload test 95
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1163,7 +1163,7 @@ requirements:
 - id: juiceshop-0096
   tuning_type: sqli
   description: SQLi payload test 96
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1175,7 +1175,7 @@ requirements:
 - id: juiceshop-0097
   tuning_type: sqli
   description: SQLi payload test 97
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1187,7 +1187,7 @@ requirements:
 - id: juiceshop-0098
   tuning_type: base64
   description: XSS payload test 98
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1199,7 +1199,7 @@ requirements:
 - id: juiceshop-0099
   tuning_type: sqli
   description: SQLi payload test 99
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1211,7 +1211,7 @@ requirements:
 - id: juiceshop-0100
   tuning_type: sqli
   description: SQLi payload test 100
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1223,7 +1223,7 @@ requirements:
 - id: juiceshop-0101
   tuning_type: sqli
   description: SQLi payload test 101
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1235,7 +1235,7 @@ requirements:
 - id: juiceshop-0102
   tuning_type: sqli
   description: SQLi payload test 102
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1247,7 +1247,7 @@ requirements:
 - id: juiceshop-0103
   tuning_type: sqli
   description: SQLi payload test 103
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1259,7 +1259,7 @@ requirements:
 - id: juiceshop-0104
   tuning_type: xss
   description: XSS payload test 104
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1271,7 +1271,7 @@ requirements:
 - id: juiceshop-0105
   tuning_type: sqli
   description: SQLi payload test 105
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1283,7 +1283,7 @@ requirements:
 - id: juiceshop-0106
   tuning_type: sqli
   description: SQLi payload test 106
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1295,7 +1295,7 @@ requirements:
 - id: juiceshop-0107
   tuning_type: sqli
   description: SQLi payload test 107
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1307,7 +1307,7 @@ requirements:
 - id: juiceshop-0108
   tuning_type: sqli
   description: SQLi payload test 108
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1319,7 +1319,7 @@ requirements:
 - id: juiceshop-0109
   tuning_type: sqli
   description: SQLi payload test 109
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1331,7 +1331,7 @@ requirements:
 - id: juiceshop-0110
   tuning_type: sqli
   description: SQLi payload test 110
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1343,7 +1343,7 @@ requirements:
 - id: juiceshop-0111
   tuning_type: sqli
   description: SQLi payload test 111
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1355,7 +1355,7 @@ requirements:
 - id: juiceshop-0112
   tuning_type: sqli
   description: SQLi payload test 112
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1367,7 +1367,7 @@ requirements:
 - id: juiceshop-0113
   tuning_type: sqli
   description: SQLi payload test 113
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1379,7 +1379,7 @@ requirements:
 - id: juiceshop-0114
   tuning_type: sqli
   description: SQLi payload test 114
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1391,7 +1391,7 @@ requirements:
 - id: juiceshop-0115
   tuning_type: sqli
   description: SQLi payload test 115
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1403,7 +1403,7 @@ requirements:
 - id: juiceshop-0116
   tuning_type: sqli
   description: SQLi payload test 116
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1415,7 +1415,7 @@ requirements:
 - id: juiceshop-0117
   tuning_type: sqli
   description: SQLi payload test 117
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1427,7 +1427,7 @@ requirements:
 - id: juiceshop-0118
   tuning_type: cmdi
   description: XSS payload test 118
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1439,7 +1439,7 @@ requirements:
 - id: juiceshop-0119
   tuning_type: sqli
   description: SQLi payload test 119
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1451,7 +1451,7 @@ requirements:
 - id: juiceshop-0120
   tuning_type: xss
   description: XSS payload test 120
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1463,7 +1463,7 @@ requirements:
 - id: juiceshop-0121
   tuning_type: xss
   description: XSS payload test 121
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1475,7 +1475,7 @@ requirements:
 - id: juiceshop-0122
   tuning_type: xss
   description: XSS payload test 122
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1487,7 +1487,7 @@ requirements:
 - id: juiceshop-0123
   tuning_type: xss
   description: XSS payload test 123
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1499,7 +1499,7 @@ requirements:
 - id: juiceshop-0124
   tuning_type: xss
   description: XSS payload test 124
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1511,7 +1511,7 @@ requirements:
 - id: juiceshop-0125
   tuning_type: cmdi
   description: XSS payload test 125
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1523,7 +1523,7 @@ requirements:
 - id: juiceshop-0126
   tuning_type: cmdi
   description: XSS payload test 126
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1535,7 +1535,7 @@ requirements:
 - id: juiceshop-0127
   tuning_type: xss
   description: XSS payload test 127
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1547,7 +1547,7 @@ requirements:
 - id: juiceshop-0128
   tuning_type: xss
   description: XSS payload test 128
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1559,7 +1559,7 @@ requirements:
 - id: juiceshop-0129
   tuning_type: xss
   description: XSS payload test 129
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1571,7 +1571,7 @@ requirements:
 - id: juiceshop-0130
   tuning_type: xss
   description: XSS payload test 130
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1583,7 +1583,7 @@ requirements:
 - id: juiceshop-0131
   tuning_type: xss
   description: XSS payload test 131
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1595,7 +1595,7 @@ requirements:
 - id: juiceshop-0132
   tuning_type: xss
   description: XSS payload test 132
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1607,7 +1607,7 @@ requirements:
 - id: juiceshop-0133
   tuning_type: cmdi
   description: XSS payload test 133
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1619,7 +1619,7 @@ requirements:
 - id: juiceshop-0134
   tuning_type: xss
   description: XSS payload test 134
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1631,7 +1631,7 @@ requirements:
 - id: juiceshop-0135
   tuning_type: xss
   description: XSS payload test 135
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1643,7 +1643,7 @@ requirements:
 - id: juiceshop-0136
   tuning_type: xss
   description: XSS payload test 136
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1655,7 +1655,7 @@ requirements:
 - id: juiceshop-0137
   tuning_type: xss
   description: XSS payload test 137
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1667,7 +1667,7 @@ requirements:
 - id: juiceshop-0138
   tuning_type: xss
   description: XSS payload test 138
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1679,7 +1679,7 @@ requirements:
 - id: juiceshop-0139
   tuning_type: xss
   description: XSS payload test 139
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1691,7 +1691,7 @@ requirements:
 - id: juiceshop-0140
   tuning_type: cmdi
   description: XSS payload test 140
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1703,7 +1703,7 @@ requirements:
 - id: juiceshop-0141
   tuning_type: xss
   description: XSS payload test 141
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1715,7 +1715,7 @@ requirements:
 - id: juiceshop-0142
   tuning_type: cmdi
   description: XSS payload test 142
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1727,7 +1727,7 @@ requirements:
 - id: juiceshop-0143
   tuning_type: cmdi
   description: XSS payload test 143
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1739,7 +1739,7 @@ requirements:
 - id: juiceshop-0144
   tuning_type: xss
   description: XSS payload test 144
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1751,7 +1751,7 @@ requirements:
 - id: juiceshop-0145
   tuning_type: xss
   description: XSS payload test 145
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1763,7 +1763,7 @@ requirements:
 - id: juiceshop-0146
   tuning_type: xss
   description: XSS payload test 146
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1775,7 +1775,7 @@ requirements:
 - id: juiceshop-0147
   tuning_type: xss
   description: XSS payload test 147
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1787,7 +1787,7 @@ requirements:
 - id: juiceshop-0148
   tuning_type: xss
   description: XSS payload test 148
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1799,7 +1799,7 @@ requirements:
 - id: juiceshop-0149
   tuning_type: xss
   description: XSS payload test 149
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1811,7 +1811,7 @@ requirements:
 - id: juiceshop-0150
   tuning_type: xss
   description: XSS payload test 150
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1823,7 +1823,7 @@ requirements:
 - id: juiceshop-0151
   tuning_type: xss
   description: XSS payload test 151
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1835,7 +1835,7 @@ requirements:
 - id: juiceshop-0152
   tuning_type: xss
   description: XSS payload test 152
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1847,7 +1847,7 @@ requirements:
 - id: juiceshop-0153
   tuning_type: lfi
   description: XSS payload test 153
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1859,7 +1859,7 @@ requirements:
 - id: juiceshop-0154
   tuning_type: xss
   description: XSS payload test 154
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1871,7 +1871,7 @@ requirements:
 - id: juiceshop-0155
   tuning_type: xss
   description: XSS payload test 155
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1883,7 +1883,7 @@ requirements:
 - id: juiceshop-0156
   tuning_type: xss
   description: XSS payload test 156
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1895,7 +1895,7 @@ requirements:
 - id: juiceshop-0157
   tuning_type: xss
   description: XSS payload test 157
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1907,7 +1907,7 @@ requirements:
 - id: juiceshop-0158
   tuning_type: lfi
   description: XSS payload test 158
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1919,7 +1919,7 @@ requirements:
 - id: juiceshop-0159
   tuning_type: xss
   description: XSS payload test 159
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1931,7 +1931,7 @@ requirements:
 - id: juiceshop-0160
   tuning_type: xss
   description: XSS payload test 160
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1943,7 +1943,7 @@ requirements:
 - id: juiceshop-0161
   tuning_type: xss
   description: XSS payload test 161
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1955,7 +1955,7 @@ requirements:
 - id: juiceshop-0162
   tuning_type: xss
   description: XSS payload test 162
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1967,7 +1967,7 @@ requirements:
 - id: juiceshop-0163
   tuning_type: lfi
   description: XSS payload test 163
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1979,7 +1979,7 @@ requirements:
 - id: juiceshop-0164
   tuning_type: xss
   description: XSS payload test 164
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -1991,7 +1991,7 @@ requirements:
 - id: juiceshop-0165
   tuning_type: xss
   description: XSS payload test 165
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2003,7 +2003,7 @@ requirements:
 - id: juiceshop-0166
   tuning_type: xss
   description: XSS payload test 166
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2015,7 +2015,7 @@ requirements:
 - id: juiceshop-0167
   tuning_type: xss
   description: XSS payload test 167
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2027,7 +2027,7 @@ requirements:
 - id: juiceshop-0168
   tuning_type: rfi
   description: XSS payload test 168
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2039,7 +2039,7 @@ requirements:
 - id: juiceshop-0169
   tuning_type: rfi
   description: XSS payload test 169
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2051,7 +2051,7 @@ requirements:
 - id: juiceshop-0170
   tuning_type: rfi
   description: XSS payload test 170
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2063,7 +2063,7 @@ requirements:
 - id: juiceshop-0171
   tuning_type: rfi
   description: XSS payload test 171
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2075,7 +2075,7 @@ requirements:
 - id: juiceshop-0172
   tuning_type: rfi
   description: XSS payload test 172
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2087,7 +2087,7 @@ requirements:
 - id: juiceshop-0173
   tuning_type: rfi
   description: XSS payload test 173
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2099,7 +2099,7 @@ requirements:
 - id: juiceshop-0174
   tuning_type: rfi
   description: XSS payload test 174
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2111,7 +2111,7 @@ requirements:
 - id: juiceshop-0175
   tuning_type: xss
   description: XSS payload test 175
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2123,7 +2123,7 @@ requirements:
 - id: juiceshop-0176
   tuning_type: xss
   description: XSS payload test 176
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2135,7 +2135,7 @@ requirements:
 - id: juiceshop-0177
   tuning_type: rfi
   description: XSS payload test 177
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2147,7 +2147,7 @@ requirements:
 - id: juiceshop-0178
   tuning_type: xss
   description: XSS payload test 178
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2159,7 +2159,7 @@ requirements:
 - id: juiceshop-0179
   tuning_type: rfi
   description: XSS payload test 179
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2171,7 +2171,7 @@ requirements:
 - id: juiceshop-0180
   tuning_type: rfi
   description: XSS payload test 180
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2183,7 +2183,7 @@ requirements:
 - id: juiceshop-0181
   tuning_type: rfi
   description: XSS payload test 181
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2195,7 +2195,7 @@ requirements:
 - id: juiceshop-0182
   tuning_type: xss
   description: XSS payload test 182
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2207,7 +2207,7 @@ requirements:
 - id: juiceshop-0183
   tuning_type: xss
   description: XSS payload test 183
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2219,7 +2219,7 @@ requirements:
 - id: juiceshop-0184
   tuning_type: xss
   description: XSS payload test 184
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2231,7 +2231,7 @@ requirements:
 - id: juiceshop-0185
   tuning_type: xss
   description: XSS payload test 185
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2243,7 +2243,7 @@ requirements:
 - id: juiceshop-0186
   tuning_type: xss
   description: XSS payload test 186
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2255,7 +2255,7 @@ requirements:
 - id: juiceshop-0187
   tuning_type: xss
   description: XSS payload test 187
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2267,7 +2267,7 @@ requirements:
 - id: juiceshop-0188
   tuning_type: xss
   description: XSS payload test 188
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2279,7 +2279,7 @@ requirements:
 - id: juiceshop-0189
   tuning_type: xss
   description: XSS payload test 189
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2291,7 +2291,7 @@ requirements:
 - id: juiceshop-0190
   tuning_type: xss
   description: XSS payload test 190
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2303,7 +2303,7 @@ requirements:
 - id: juiceshop-0191
   tuning_type: xss
   description: XSS payload test 191
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2315,7 +2315,7 @@ requirements:
 - id: juiceshop-0192
   tuning_type: xss
   description: XSS payload test 192
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2327,7 +2327,7 @@ requirements:
 - id: juiceshop-0193
   tuning_type: xss
   description: XSS payload test 193
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2339,7 +2339,7 @@ requirements:
 - id: juiceshop-0194
   tuning_type: xss
   description: XSS payload test 194
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2351,7 +2351,7 @@ requirements:
 - id: juiceshop-0195
   tuning_type: xss
   description: XSS payload test 195
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2363,7 +2363,7 @@ requirements:
 - id: juiceshop-0196
   tuning_type: xss
   description: XSS payload test 196
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2375,7 +2375,7 @@ requirements:
 - id: juiceshop-0197
   tuning_type: xss
   description: XSS payload test 197
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2387,7 +2387,7 @@ requirements:
 - id: juiceshop-0198
   tuning_type: xss
   description: XSS payload test 198
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2399,7 +2399,7 @@ requirements:
 - id: juiceshop-0199
   tuning_type: xss
   description: XSS payload test 199
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2411,7 +2411,7 @@ requirements:
 - id: juiceshop-0200
   tuning_type: xss
   description: XSS payload test 200
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2423,7 +2423,7 @@ requirements:
 - id: juiceshop-0201
   tuning_type: xss
   description: XSS payload test 201
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2435,7 +2435,7 @@ requirements:
 - id: juiceshop-0202
   tuning_type: xss
   description: XSS payload test 202
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2447,7 +2447,7 @@ requirements:
 - id: juiceshop-0203
   tuning_type: xss
   description: XSS payload test 203
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2459,7 +2459,7 @@ requirements:
 - id: juiceshop-0204
   tuning_type: xss
   description: XSS payload test 204
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2471,7 +2471,7 @@ requirements:
 - id: juiceshop-0205
   tuning_type: xss
   description: XSS payload test 205
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2483,7 +2483,7 @@ requirements:
 - id: juiceshop-0206
   tuning_type: xss
   description: XSS payload test 206
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2495,7 +2495,7 @@ requirements:
 - id: juiceshop-0207
   tuning_type: xss
   description: XSS payload test 207
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2507,7 +2507,7 @@ requirements:
 - id: juiceshop-0208
   tuning_type: xss
   description: XSS payload test 208
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2519,7 +2519,7 @@ requirements:
 - id: juiceshop-0209
   tuning_type: xss
   description: XSS payload test 209
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2531,7 +2531,7 @@ requirements:
 - id: juiceshop-0210
   tuning_type: xss
   description: XSS payload test 210
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2543,7 +2543,7 @@ requirements:
 - id: juiceshop-0211
   tuning_type: xss
   description: XSS payload test 211
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2555,7 +2555,7 @@ requirements:
 - id: juiceshop-0212
   tuning_type: xss
   description: XSS payload test 212
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2567,7 +2567,7 @@ requirements:
 - id: juiceshop-0213
   tuning_type: xss
   description: XSS payload test 213
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2579,7 +2579,7 @@ requirements:
 - id: juiceshop-0214
   tuning_type: xss
   description: XSS payload test 214
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2591,7 +2591,7 @@ requirements:
 - id: juiceshop-0215
   tuning_type: xss
   description: XSS payload test 215
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2603,7 +2603,7 @@ requirements:
 - id: juiceshop-0216
   tuning_type: ssti
   description: XSS payload test 216
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2615,7 +2615,7 @@ requirements:
 - id: juiceshop-0217
   tuning_type: ssti
   description: XSS payload test 217
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2627,7 +2627,7 @@ requirements:
 - id: juiceshop-0218
   tuning_type: xss
   description: XSS payload test 218
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2639,7 +2639,7 @@ requirements:
 - id: juiceshop-0219
   tuning_type: ssti
   description: XSS payload test 219
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2651,7 +2651,7 @@ requirements:
 - id: juiceshop-0220
   tuning_type: ssti
   description: XSS payload test 220
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2663,7 +2663,7 @@ requirements:
 - id: juiceshop-0221
   tuning_type: ssti
   description: XSS payload test 221
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2675,7 +2675,7 @@ requirements:
 - id: juiceshop-0222
   tuning_type: ssti
   description: XSS payload test 222
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2687,7 +2687,7 @@ requirements:
 - id: juiceshop-0223
   tuning_type: ssti
   description: XSS payload test 223
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2699,7 +2699,7 @@ requirements:
 - id: juiceshop-0224
   tuning_type: xss
   description: XSS payload test 224
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2711,7 +2711,7 @@ requirements:
 - id: juiceshop-0225
   tuning_type: ssti
   description: XSS payload test 225
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2723,7 +2723,7 @@ requirements:
 - id: juiceshop-0226
   tuning_type: ssti
   description: XSS payload test 226
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2735,7 +2735,7 @@ requirements:
 - id: juiceshop-0227
   tuning_type: ssti
   description: XSS payload test 227
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2747,7 +2747,7 @@ requirements:
 - id: juiceshop-0228
   tuning_type: xss
   description: XSS payload test 228
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2759,7 +2759,7 @@ requirements:
 - id: juiceshop-0229
   tuning_type: xss
   description: XSS payload test 229
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2771,7 +2771,7 @@ requirements:
 - id: juiceshop-0230
   tuning_type: xss
   description: XSS payload test 230
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2783,7 +2783,7 @@ requirements:
 - id: juiceshop-0231
   tuning_type: xss
   description: XSS payload test 231
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2795,7 +2795,7 @@ requirements:
 - id: juiceshop-0232
   tuning_type: xss
   description: XSS payload test 232
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2807,7 +2807,7 @@ requirements:
 - id: juiceshop-0233
   tuning_type: xss
   description: XSS payload test 233
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2819,7 +2819,7 @@ requirements:
 - id: juiceshop-0234
   tuning_type: xss
   description: XSS payload test 234
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2831,7 +2831,7 @@ requirements:
 - id: juiceshop-0235
   tuning_type: xss
   description: XSS payload test 235
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2843,7 +2843,7 @@ requirements:
 - id: juiceshop-0236
   tuning_type: xss
   description: XSS payload test 236
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2855,7 +2855,7 @@ requirements:
 - id: juiceshop-0237
   tuning_type: xss
   description: XSS payload test 237
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2867,7 +2867,7 @@ requirements:
 - id: juiceshop-0238
   tuning_type: xss
   description: XSS payload test 238
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2879,7 +2879,7 @@ requirements:
 - id: juiceshop-0239
   tuning_type: xss
   description: XSS payload test 239
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2891,7 +2891,7 @@ requirements:
 - id: juiceshop-0240
   tuning_type: xss
   description: XSS payload test 240
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2903,7 +2903,7 @@ requirements:
 - id: juiceshop-0241
   tuning_type: xss
   description: XSS payload test 241
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2915,7 +2915,7 @@ requirements:
 - id: juiceshop-0242
   tuning_type: xss
   description: XSS payload test 242
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2927,7 +2927,7 @@ requirements:
 - id: juiceshop-0243
   tuning_type: xss
   description: XSS payload test 243
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2939,7 +2939,7 @@ requirements:
 - id: juiceshop-0244
   tuning_type: xss
   description: XSS payload test 244
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2951,7 +2951,7 @@ requirements:
 - id: juiceshop-0245
   tuning_type: xss
   description: XSS payload test 245
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2963,7 +2963,7 @@ requirements:
 - id: juiceshop-0246
   tuning_type: xss
   description: XSS payload test 246
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2975,7 +2975,7 @@ requirements:
 - id: juiceshop-0247
   tuning_type: xss
   description: XSS payload test 247
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2987,7 +2987,7 @@ requirements:
 - id: juiceshop-0248
   tuning_type: xss
   description: XSS payload test 248
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -2999,7 +2999,7 @@ requirements:
 - id: juiceshop-0249
   tuning_type: xss
   description: XSS payload test 249
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3011,7 +3011,7 @@ requirements:
 - id: juiceshop-0250
   tuning_type: xss
   description: XSS payload test 250
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3023,7 +3023,7 @@ requirements:
 - id: juiceshop-0251
   tuning_type: xss
   description: XSS payload test 251
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3035,7 +3035,7 @@ requirements:
 - id: juiceshop-0252
   tuning_type: xss
   description: XSS payload test 252
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3047,7 +3047,7 @@ requirements:
 - id: juiceshop-0253
   tuning_type: xss
   description: XSS payload test 253
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3059,7 +3059,7 @@ requirements:
 - id: juiceshop-0254
   tuning_type: xss
   description: XSS payload test 254
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3071,7 +3071,7 @@ requirements:
 - id: juiceshop-0255
   tuning_type: xss
   description: XSS payload test 255
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3083,7 +3083,7 @@ requirements:
 - id: juiceshop-0256
   tuning_type: xss
   description: XSS payload test 256
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3095,7 +3095,7 @@ requirements:
 - id: juiceshop-0257
   tuning_type: xss
   description: XSS payload test 257
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3107,7 +3107,7 @@ requirements:
 - id: juiceshop-0258
   tuning_type: xss
   description: XSS payload test 258
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3119,7 +3119,7 @@ requirements:
 - id: juiceshop-0259
   tuning_type: xss
   description: XSS payload test 259
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3131,7 +3131,7 @@ requirements:
 - id: juiceshop-0260
   tuning_type: xss
   description: XSS payload test 260
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3143,7 +3143,7 @@ requirements:
 - id: juiceshop-0261
   tuning_type: xss
   description: XSS payload test 261
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3155,7 +3155,7 @@ requirements:
 - id: juiceshop-0262
   tuning_type: xss
   description: XSS payload test 262
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3167,7 +3167,7 @@ requirements:
 - id: juiceshop-0263
   tuning_type: xss
   description: XSS payload test 263
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3179,7 +3179,7 @@ requirements:
 - id: juiceshop-0264
   tuning_type: xss
   description: XSS payload test 264
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3191,7 +3191,7 @@ requirements:
 - id: juiceshop-0265
   tuning_type: xss
   description: XSS payload test 265
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3203,7 +3203,7 @@ requirements:
 - id: juiceshop-0266
   tuning_type: xss
   description: XSS payload test 266
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3215,7 +3215,7 @@ requirements:
 - id: juiceshop-0267
   tuning_type: xss
   description: XSS payload test 267
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3227,7 +3227,7 @@ requirements:
 - id: juiceshop-0268
   tuning_type: xss
   description: XSS payload test 268
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3239,7 +3239,7 @@ requirements:
 - id: juiceshop-0269
   tuning_type: xss
   description: XSS payload test 269
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3251,7 +3251,7 @@ requirements:
 - id: juiceshop-0270
   tuning_type: xss
   description: XSS payload test 270
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3263,7 +3263,7 @@ requirements:
 - id: juiceshop-0271
   tuning_type: xss
   description: XSS payload test 271
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3275,7 +3275,7 @@ requirements:
 - id: juiceshop-0272
   tuning_type: xss
   description: XSS payload test 272
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3287,7 +3287,7 @@ requirements:
 - id: juiceshop-0273
   tuning_type: xss
   description: XSS payload test 273
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3299,7 +3299,7 @@ requirements:
 - id: juiceshop-0274
   tuning_type: xss
   description: XSS payload test 274
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3311,7 +3311,7 @@ requirements:
 - id: juiceshop-0275
   tuning_type: xss
   description: XSS payload test 275
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3323,7 +3323,7 @@ requirements:
 - id: juiceshop-0276
   tuning_type: xss
   description: XSS payload test 276
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3335,7 +3335,7 @@ requirements:
 - id: juiceshop-0277
   tuning_type: xss
   description: XSS payload test 277
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3347,7 +3347,7 @@ requirements:
 - id: juiceshop-0278
   tuning_type: xss
   description: XSS payload test 278
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3359,7 +3359,7 @@ requirements:
 - id: juiceshop-0279
   tuning_type: xss
   description: XSS payload test 279
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3371,7 +3371,7 @@ requirements:
 - id: juiceshop-0280
   tuning_type: xss
   description: XSS payload test 280
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3383,7 +3383,7 @@ requirements:
 - id: juiceshop-0281
   tuning_type: xss
   description: XSS payload test 281
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3395,7 +3395,7 @@ requirements:
 - id: juiceshop-0282
   tuning_type: xss
   description: XSS payload test 282
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3407,7 +3407,7 @@ requirements:
 - id: juiceshop-0283
   tuning_type: xss
   description: XSS payload test 283
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3419,7 +3419,7 @@ requirements:
 - id: juiceshop-0284
   tuning_type: xss
   description: XSS payload test 284
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3431,7 +3431,7 @@ requirements:
 - id: juiceshop-0285
   tuning_type: xss
   description: XSS payload test 285
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3443,7 +3443,7 @@ requirements:
 - id: juiceshop-0286
   tuning_type: xss
   description: XSS payload test 286
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3455,7 +3455,7 @@ requirements:
 - id: juiceshop-0287
   tuning_type: sqli
   description: SQLi payload test 287
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3467,7 +3467,7 @@ requirements:
 - id: juiceshop-0288
   tuning_type: sqli
   description: SQLi payload test 288
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3479,7 +3479,7 @@ requirements:
 - id: juiceshop-0289
   tuning_type: sqli
   description: SQLi payload test 289
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3491,7 +3491,7 @@ requirements:
 - id: juiceshop-0290
   tuning_type: sqli
   description: SQLi payload test 290
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3503,7 +3503,7 @@ requirements:
 - id: juiceshop-0291
   tuning_type: sqli
   description: SQLi payload test 291
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3515,7 +3515,7 @@ requirements:
 - id: juiceshop-0292
   tuning_type: sqli
   description: SQLi payload test 292
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3527,7 +3527,7 @@ requirements:
 - id: juiceshop-0293
   tuning_type: sqli
   description: SQLi payload test 293
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3539,7 +3539,7 @@ requirements:
 - id: juiceshop-0294
   tuning_type: sqli
   description: SQLi payload test 294
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3551,7 +3551,7 @@ requirements:
 - id: juiceshop-0295
   tuning_type: sqli
   description: SQLi payload test 295
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3563,7 +3563,7 @@ requirements:
 - id: juiceshop-0296
   tuning_type: sqli
   description: SQLi payload test 296
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3575,7 +3575,7 @@ requirements:
 - id: juiceshop-0297
   tuning_type: sqli
   description: SQLi payload test 297
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3587,7 +3587,7 @@ requirements:
 - id: juiceshop-0298
   tuning_type: sqli
   description: SQLi payload test 298
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3599,7 +3599,7 @@ requirements:
 - id: juiceshop-0299
   tuning_type: sqli
   description: SQLi payload test 299
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3611,7 +3611,7 @@ requirements:
 - id: juiceshop-0300
   tuning_type: sqli
   description: SQLi payload test 300
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3623,7 +3623,7 @@ requirements:
 - id: juiceshop-0301
   tuning_type: sqli
   description: SQLi payload test 301
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3635,7 +3635,7 @@ requirements:
 - id: juiceshop-0302
   tuning_type: sqli
   description: SQLi payload test 302
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3647,7 +3647,7 @@ requirements:
 - id: juiceshop-0303
   tuning_type: sqli
   description: SQLi payload test 303
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3659,7 +3659,7 @@ requirements:
 - id: juiceshop-0304
   tuning_type: sqli
   description: SQLi payload test 304
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3671,7 +3671,7 @@ requirements:
 - id: juiceshop-0305
   tuning_type: sqli
   description: SQLi payload test 305
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3683,7 +3683,7 @@ requirements:
 - id: juiceshop-0306
   tuning_type: sqli
   description: SQLi payload test 306
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3695,7 +3695,7 @@ requirements:
 - id: juiceshop-0307
   tuning_type: sqli
   description: SQLi payload test 307
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3707,7 +3707,7 @@ requirements:
 - id: juiceshop-0308
   tuning_type: sqli
   description: SQLi payload test 308
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3719,7 +3719,7 @@ requirements:
 - id: juiceshop-0309
   tuning_type: sqli
   description: SQLi payload test 309
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3731,7 +3731,7 @@ requirements:
 - id: juiceshop-0310
   tuning_type: sqli
   description: SQLi payload test 310
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3743,7 +3743,7 @@ requirements:
 - id: juiceshop-0311
   tuning_type: sqli
   description: SQLi payload test 311
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3755,7 +3755,7 @@ requirements:
 - id: juiceshop-0312
   tuning_type: sqli
   description: SQLi payload test 312
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3767,7 +3767,7 @@ requirements:
 - id: juiceshop-0313
   tuning_type: sqli
   description: SQLi payload test 313
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3779,7 +3779,7 @@ requirements:
 - id: juiceshop-0314
   tuning_type: sqli
   description: SQLi payload test 314
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3791,7 +3791,7 @@ requirements:
 - id: juiceshop-0315
   tuning_type: sqli
   description: SQLi payload test 315
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3803,7 +3803,7 @@ requirements:
 - id: juiceshop-0316
   tuning_type: xss
   description: XSS payload test 316
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3815,7 +3815,7 @@ requirements:
 - id: juiceshop-0317
   tuning_type: sqli
   description: SQLi payload test 317
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3827,7 +3827,7 @@ requirements:
 - id: juiceshop-0318
   tuning_type: sqli
   description: SQLi payload test 318
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3839,7 +3839,7 @@ requirements:
 - id: juiceshop-0319
   tuning_type: sqli
   description: SQLi payload test 319
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3851,7 +3851,7 @@ requirements:
 - id: juiceshop-0320
   tuning_type: xss
   description: XSS payload test 320
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3863,7 +3863,7 @@ requirements:
 - id: juiceshop-0321
   tuning_type: sqli
   description: SQLi payload test 321
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3875,7 +3875,7 @@ requirements:
 - id: juiceshop-0322
   tuning_type: sqli
   description: SQLi payload test 322
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3887,7 +3887,7 @@ requirements:
 - id: juiceshop-0323
   tuning_type: xss
   description: XSS payload test 323
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3899,7 +3899,7 @@ requirements:
 - id: juiceshop-0324
   tuning_type: lfi
   description: XSS payload test 324
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3911,7 +3911,7 @@ requirements:
 - id: juiceshop-0325
   tuning_type: sqli
   description: SQLi payload test 325
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3923,7 +3923,7 @@ requirements:
 - id: juiceshop-0326
   tuning_type: xss
   description: XSS payload test 326
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3935,7 +3935,7 @@ requirements:
 - id: juiceshop-0327
   tuning_type: sqli
   description: SQLi payload test 327
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3947,7 +3947,7 @@ requirements:
 - id: juiceshop-0328
   tuning_type: sqli
   description: SQLi payload test 328
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3959,7 +3959,7 @@ requirements:
 - id: juiceshop-0329
   tuning_type: sqli
   description: SQLi payload test 329
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3971,7 +3971,7 @@ requirements:
 - id: juiceshop-0330
   tuning_type: sqli
   description: SQLi payload test 330
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3983,7 +3983,7 @@ requirements:
 - id: juiceshop-0331
   tuning_type: sqli
   description: SQLi payload test 331
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -3995,7 +3995,7 @@ requirements:
 - id: juiceshop-0332
   tuning_type: sqli
   description: SQLi payload test 332
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -4007,7 +4007,7 @@ requirements:
 - id: juiceshop-0333
   tuning_type: sqli
   description: SQLi payload test 333
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -4019,7 +4019,7 @@ requirements:
 - id: juiceshop-0334
   tuning_type: sqli
   description: SQLi payload test 334
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -4031,7 +4031,7 @@ requirements:
 - id: juiceshop-0335
   tuning_type: sqli
   description: SQLi payload test 335
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -4043,7 +4043,7 @@ requirements:
 - id: juiceshop-0336
   tuning_type: sqli
   description: SQLi payload test 336
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -4055,7 +4055,7 @@ requirements:
 - id: juiceshop-0337
   tuning_type: sqli
   description: SQLi payload test 337
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -4067,7 +4067,7 @@ requirements:
 - id: juiceshop-0338
   tuning_type: sqli
   description: SQLi payload test 338
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -4079,7 +4079,7 @@ requirements:
 - id: juiceshop-0339
   tuning_type: xss
   description: XSS payload test 339
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -4091,7 +4091,7 @@ requirements:
 - id: juiceshop-0340
   tuning_type: xss
   description: XSS payload test 340
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -4103,7 +4103,7 @@ requirements:
 - id: juiceshop-0341
   tuning_type: sqli
   description: SQLi payload test 341
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -4115,7 +4115,7 @@ requirements:
 - id: juiceshop-0342
   tuning_type: cmdi
   description: XSS payload test 342
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -4127,7 +4127,7 @@ requirements:
 - id: juiceshop-0343
   tuning_type: cmdi
   description: XSS payload test 343
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:
@@ -4139,7 +4139,7 @@ requirements:
 - id: juiceshop-0344
   tuning_type: cmdi
   description: XSS payload test 344
-  uri: /rest/products/search
+  uri: /rest/user/login
   method: POST
   host: dlpaasrngb6ue.cloudfront.net
   headers:

@@ -228,52 +228,24 @@ class WAFTestRunner:
                 qs = "q=" + ("X" * (req.test_config.test_querystring_size - 2))
                 uri = f"{req.uri}?{qs}"
 
-        elif tuning_type == "xss":
-            # Send XSS payload as raw body for WAF inspection
+        elif tuning_type in ("xss", "cmdi", "lfi", "rfi", "ssti", "base64"):
+            # Send payload inside login JSON body — WAF inspects the body
             if req.test_config.test_payload:
-                body = req.test_config.test_payload
-            else:
-                body = '<div class="user-content">Test</div>'
+                body = json.dumps({
+                    "email": str(req.test_config.test_payload),
+                    "password": "test"
+                })
 
         elif tuning_type == "sqli":
-            # Send SQLi payload in query string AND body for WAF inspection
+            # Send SQLi in both login body and query string
             if req.test_config.test_query:
                 uri = f"{req.uri}?{req.test_config.test_query}"
             elif req.test_config.test_payload:
-                # Query string — triggers SQLi_QUERYSTRING detection
                 uri = f"{req.uri}?q={req.test_config.test_payload}"
-                # Body — triggers SQLi_Body detection
-                body = json.dumps({"search": req.test_config.test_payload})
-
-        elif tuning_type == "cmdi":
-            # Command injection — send in query string and body
-            if req.test_config.test_payload:
-                uri = f"{req.uri}?cmd={req.test_config.test_payload}"
-                body = req.test_config.test_payload
-
-        elif tuning_type == "lfi":
-            # Local file inclusion — send as path in query string
-            if req.test_config.test_payload:
-                uri = f"{req.uri}?file={req.test_config.test_payload}"
-                body = req.test_config.test_payload
-
-        elif tuning_type == "rfi":
-            # Remote file inclusion — send as URL in query string
-            if req.test_config.test_payload:
-                uri = f"{req.uri}?url={req.test_config.test_payload}"
-                body = req.test_config.test_payload
-
-        elif tuning_type == "ssti":
-            # Template injection — send in body and query string
-            if req.test_config.test_payload:
-                uri = f"{req.uri}?template={req.test_config.test_payload}"
-                body = req.test_config.test_payload
-
-        elif tuning_type == "base64":
-            # Base64-encoded payloads — send as-is, WAF should still block
-            if req.test_config.test_payload:
-                uri = f"{req.uri}?data={req.test_config.test_payload}"
-                body = req.test_config.test_payload
+                body = json.dumps({
+                    "email": str(req.test_config.test_payload),
+                    "password": "test"
+                })
 
         # winshell and default: standard request with no special payload
 
@@ -306,8 +278,8 @@ class WAFTestRunner:
                 message=f"HTTP error: {response.error}",
             )
 
-        # 502 after all retries = WAF gap (payload bypassed WAF and crashed backend)
-        if response.status_code == 502:
+        # 500/502 = WAF gap (payload bypassed WAF, backend error)
+        if response.status_code in (500, 502):
             return TestResult(
                 test_id=test_id,
                 requirement_id=req.id,
@@ -315,10 +287,10 @@ class WAFTestRunner:
                 status=TestStatus.FAIL,
                 test_type="positive",
                 expected_action=expected_action,
-                actual_action="BACKEND_CRASH",
-                http_status=502,
+                actual_action="BACKEND_ERROR",
+                http_status=response.status_code,
                 request_id=request.request_id,
-                message="WAF GAP: Payload reached backend and caused 502 (not blocked by WAF)",
+                message=f"WAF GAP: Payload reached backend and caused {response.status_code} (not blocked by WAF)",
                 duration_ms=response.duration_ms,
             )
 
