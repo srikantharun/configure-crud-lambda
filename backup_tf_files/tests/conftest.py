@@ -155,7 +155,10 @@ def discover_configs(module_filter: str=None) -> list[tuple[WAFTestConfig, str]]
         print(f"Warning: Modules root not found: {MODULES_ROOT}")
         return configs
 
-    for yaml_file in MODULES_ROOT.rglob("waf_requirements.yaml"):
+    # Default loads waf_requirements.yaml (POST). Override for a GET test:
+    #   WAF_TEST_REQUIREMENTS_FILENAME=waf_requirements_get.yaml make test-json MODULE=...
+    requirements_filename = os.getenv("WAF_TEST_REQUIREMENTS_FILENAME", "waf_requirements.yaml")
+    for yaml_file in MODULES_ROOT.rglob(requirements_filename):
         policy_name = yaml_file.parent.name
 
         if module_filter and policy_name != module_filter:
