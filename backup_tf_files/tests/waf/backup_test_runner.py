@@ -1,17 +1,18 @@
 """
-WAF Test Runner (GET variant) - Executes GET-method test cases and generates coverage reports.
+WAF Test Runner - Executes test cases and generates coverage reports.
 
-Differences vs test_runner.py:
-- Discovers `waf_requirements_get.yaml` (not `waf_requirements.yaml`)
-- Payload placement is method-aware:
-    * xss/cmdi/lfi/rfi/ssti/base64 + GET -> payload URL-encoded into ?q=
-    * sqli + GET                         -> payload URL-encoded into ?q=, no body
-    * non-GET methods                    -> payload in JSON body (legacy POST behaviour preserved)
-- Body is force-cleared on GET requests so the WAF inspects QUERY_STRING only.
+Test Cases:
+1. POSITIVE: Fire payload and verify WAF blocks with 403
+
+Note on CloudFront bug:
+- For GET requests with large query strings, CloudFront blocks BEFORE WAF evaluates
+- Workaround: Lower WAF query_string size rule from 1024 to 10 for testing
+- This ensures WAF blocks (not CloudFront) so we can verify labels
 """
 from __future__ import annotations
 
 import json
+import os
 import time
 import yaml
 from datetime import datetime
@@ -31,23 +32,19 @@ from .http_client import WAFHttpClient, WAFRequest
 from .cloudwatch_client import CloudWatchWAFClient
 
 
-REQUIREMENTS_FILENAME = "waf_requirements_get.yaml"
-
-
 class WAFTestRunner:
     """
-    GET-method test runner for WAF policy verification.
+    Test runner for WAF policy verification.
 
-    Same public class name and surface as tests.waf.test_runner.WAFTestRunner so
-    existing importers (`from tests.waf.test_runner_get import WAFTestRunner`)
-    work without code changes. Differences vs the POST runner:
-      - Discovers `waf_requirements_get.yaml` only.
-      - Routes payloads through the query string (no body) on GET.
+    Key behaviors:
+    - Host header derived from WAF_ENDPOINT (not from yaml)
+    - Only runs TEST 1 (positive) per requirement
+    - Retries on 502 errors
     """
 
     MAX_HEADER_SIZE_BYTES = 8 * 1024  # 8KB
-    NEGATIVE_URI_BODY_SIZE = 68000
-    NEGATIVE_URI_PREFIX = "/mytest"
+    NEGATIVE_URI_BODY_SIZE = 68000  # more than 64KB for negative uri body size
+    NEGATIVE_URI_PREFIX = "/mytest"  # Configurable prefix for negative tests
 
     def __init__(
         self,
@@ -65,11 +62,14 @@ class WAFTestRunner:
         self.owasp_namespace = owasp_namespace
         self.negative_uri_prefix = negative_uri_prefix
 
+        # Extract host from WAF_ENDPOINT for all requests
         parsed = urlparse(waf_endpoint)
         self.waf_host = parsed.netloc or parsed.path.split('/')[0]
 
+        # Default modules root
         self.modules_root = modules_root or Path(__file__).parent.parent.parent / "modules" / "custom"
 
+        # Initialize clients
         self.http = WAFHttpClient(base_url=waf_endpoint)
         self.cw = CloudWatchWAFClient(
             log_group=cloudwatch_log_group,
@@ -80,14 +80,14 @@ class WAFTestRunner:
         self.configs: dict[str, WAFTestConfig] = {}
 
     def discover_configs(self) -> dict[str, WAFTestConfig]:
-        """Discover waf_requirements_get.yaml files from modules directory."""
+        """Discover waf_requirements.yaml files from modules directory."""
         configs = {}
 
         if not self.modules_root.exists():
             print(f"Warning: Modules root not found: {self.modules_root}")
             return configs
 
-        for yaml_file in self.modules_root.rglob(REQUIREMENTS_FILENAME):
+        for yaml_file in self.modules_root.rglob("waf_requirements.yaml"):
             policy_name = yaml_file.parent.name
 
             try:
@@ -102,7 +102,7 @@ class WAFTestRunner:
                     req.source_file = str(yaml_file)
 
                 configs[policy_name] = config
-                print(f"  Loaded: {policy_name} ({len(config.requirements)} requirements) [GET]")
+                print(f"  Loaded: {policy_name} ({len(config.requirements)} requirements)")
 
             except Exception as e:
                 print(f"  Warning: Failed to load {yaml_file}: {e}")
@@ -127,9 +127,9 @@ class WAFTestRunner:
         return replace_vars(data)
 
     def run_all_tests(self, policy_filter: Optional[str] = None) -> CoverageReport:
-        """Run all GET test cases for specified policy."""
+        """Run all test cases for specified policy."""
         print("\n" + "=" * 70)
-        print("WAF POLICY TEST RUNNER (GET)")
+        print("WAF POLICY TEST RUNNER")
         print("=" * 70)
         print(f"Endpoint: {self.waf_endpoint}")
         print(f"Host:     {self.waf_host}")
@@ -159,15 +159,18 @@ class WAFTestRunner:
     def _run_policy_tests(self, config: WAFTestConfig) -> list[TestResult]:
         """Run TEST 1 (positive) for each requirement."""
         results = []
-        per_request_delay = 2
+        per_request_delay = 2  # seconds between each test
 
         for idx, req in enumerate(config.requirements):
             if idx > 0:
                 time.sleep(per_request_delay)
 
-            tuning_type = req.tuning_type or "size_querystring"
-            print(f"\n  Requirement: {req.id} [{tuning_type}] ({req.method} {req.uri})")
+            tuning_type = req.tuning_type or "size_body"  # Default to size_body
+            print(f"\n  Requirement: {req.id} [{tuning_type}] ({req.uri})")
 
+            # =================================================================
+            # TEST 1: POSITIVE - Fire payload, expect BLOCK (403)
+            # =================================================================
             result = self._test_positive(config, req)
             results.append(result)
             self._print_result("TEST 1 [POSITIVE]", result)
@@ -178,81 +181,90 @@ class WAFTestRunner:
     # TEST 1: POSITIVE - Fire payload and check expected_action
     # =========================================================================
     def _test_positive(self, config: WAFTestConfig, req: WAFRequirement) -> TestResult:
-        test_id = f"{req.id}:positive"
-        tuning_type = req.tuning_type or "size_querystring"
-        expected_action = req.test_config.expected_action or "ALLOW"
-        is_get = (req.method or "").upper() == "GET"
+        """
+        Fire the test payload and verify the result matches expected_action.
 
+        If expected_action is BLOCK: 403 = PASS, anything else = FAIL
+        If expected_action is ALLOW: non-403 = PASS, 403 = FAIL
+        """
+        test_id = f"{req.id}:positive"
+        tuning_type = req.tuning_type or "size_body"
+        expected_action = req.test_config.expected_action or "ALLOW"
+
+        # Build base request
         uri = req.uri
         body = None
 
-        def load_data_file(file_path: str) -> Optional[str]:
+        # Helper: Load body from file if specified
+        def load_data_file(file_path: str) -> str:
+            """Load content from file, return None if not found."""
+            from pathlib import Path
             path = Path(file_path).expanduser()
             if path.exists():
                 content = path.read_text()
                 print(f"    Loaded {len(content)} bytes from {path}")
                 return content
-            print(f"    File not found: {path}, using generated payload")
-            return None
+            else:
+                print(f"    File not found: {path}, using generated payload")
+                return None
 
-        # ------------------------------------------------------------------
-        # Build payload placement, method-aware
-        # ------------------------------------------------------------------
+        # Customize request based on tuning_type
         if tuning_type == "size_body":
-            # size_body is a POST-only test — keep legacy behaviour
+            # Priority 1: Load from data_file if specified
             if req.test_config.data_file:
+                print(f"    DEBUG: Loading from data_file: {req.test_config.data_file}")
                 body = load_data_file(req.test_config.data_file)
+            # Add large body if configured
             if body is None and req.test_config.test_large_body:
+                print(f"    DEBUG: Using generated payload of {req.test_config.large_body_size_bytes} bytes")
                 body = "X" * req.test_config.large_body_size_bytes
 
         elif tuning_type == "size_querystring":
+            # Add query string for query string size testing
             if req.test_config.test_querystring:
                 uri = f"{req.uri}?{req.test_config.test_querystring}"
             elif req.test_config.test_querystring_size > 0:
+                # Generate query string of specified size
                 qs = "q=" + ("X" * (req.test_config.test_querystring_size - 2))
                 uri = f"{req.uri}?{qs}"
 
         elif tuning_type in ("xss", "cmdi", "lfi", "rfi", "ssti", "base64"):
-            payload = req.test_config.test_payload
-            if payload is not None:
-                if is_get:
-                    uri = f"{req.uri}?q={quote(str(payload), safe='')}"
-                else:
-                    body = json.dumps({"email": str(payload), "password": "test"})
+            # Send payload inside login JSON body — WAF inspects the body
+            if req.test_config.test_payload:
+                body = json.dumps({
+                    "email": str(req.test_config.test_payload),
+                    "password": "test"
+                })
 
         elif tuning_type == "sqli":
-            payload = req.test_config.test_payload
+            # Send SQLi in both login body and query string
             if req.test_config.test_query:
                 uri = f"{req.uri}?{req.test_config.test_query}"
-            elif payload is not None:
-                uri = f"{req.uri}?q={quote(str(payload), safe='')}"
-            if not is_get and payload is not None:
-                body = json.dumps({"email": str(payload), "password": "test"})
+            elif req.test_config.test_payload:
+                uri = f"{req.uri}?q={req.test_config.test_payload}"
+                body = json.dumps({
+                    "email": str(req.test_config.test_payload),
+                    "password": "test"
+                })
 
-        # ------------------------------------------------------------------
-        # Final safety guard: GET must never carry a body
-        # ------------------------------------------------------------------
-        if is_get and body is not None:
-            body = None
+        # winshell and default: standard request with no special payload
 
+        # Build headers with test metadata for CloudWatch filtering
         headers = dict(req.headers)
         headers["X-Test-Id"] = req.id
         headers["X-Test-Category"] = tuning_type
         payload_summary = str(req.test_config.test_payload or "")[:50].replace("\n", " ")
         headers["X-Test-Payload"] = payload_summary
-        # Strip body-related headers on GET so origin/CDN don't reject the request
-        if is_get:
-            headers.pop("Content-Type", None)
-            headers.pop("Content-Length", None)
 
         request = WAFRequest(
             uri=uri,
             method=req.method,
-            host=self.waf_host,
+            host=self.waf_host,  # Use WAF_ENDPOINT host
             headers=headers,
             body=body,
         )
 
+        start_time = datetime.utcnow()
         response = self.http.send(request)
 
         if response.error:
@@ -282,6 +294,7 @@ class WAFTestRunner:
                 duration_ms=response.duration_ms,
             )
 
+        # If expected_action is BLOCK, a 403 is a PASS
         if expected_action == "BLOCK":
             if response.status_code == 403:
                 return TestResult(
@@ -297,20 +310,21 @@ class WAFTestRunner:
                     message="Correctly blocked (403)",
                     duration_ms=response.duration_ms,
                 )
-            return TestResult(
-                test_id=test_id,
-                requirement_id=req.id,
-                policy_name=config.policy.name,
-                status=TestStatus.FAIL,
-                test_type="positive",
-                expected_action="BLOCK",
-                actual_action="ALLOW",
-                http_status=response.status_code,
-                request_id=request.request_id,
-                message=f"Expected BLOCK but got {response.status_code}",
-            )
+            else:
+                return TestResult(
+                    test_id=test_id,
+                    requirement_id=req.id,
+                    policy_name=config.policy.name,
+                    status=TestStatus.FAIL,
+                    test_type="positive",
+                    expected_action="BLOCK",
+                    actual_action="ALLOW",
+                    http_status=response.status_code,
+                    request_id=request.request_id,
+                    message=f"Expected BLOCK but got {response.status_code}",
+                )
 
-        # ALLOW path — no FP label verification
+        # ALLOW path — no FP label verification needed
         if response.status_code != 403:
             return TestResult(
                 test_id=test_id,
@@ -337,24 +351,38 @@ class WAFTestRunner:
         )
 
     # =========================================================================
+    # TEST 2-6: Commented out - only running TEST 1 (positive) for now
+    # =========================================================================
+    # def _test_oversized_user_agent(self, config, req): ...    # TEST 2
+    # def _test_gamification_sqli(self, config, req): ...       # TEST 3
+    # def _test_negative_uri(self, config, req): ...            # TEST 4
+    # def _test_oversized_cookie(self, config, req): ...        # TEST 5
+    # def _test_large_body_with_injection(self, config, req):...# TEST 6
+
+    # =========================================================================
     # Reporting
     # =========================================================================
     def _print_result(self, label: str, result: TestResult):
+        """Print single test result."""
         icons = {TestStatus.PASS: "PASS", TestStatus.FAIL: "FAIL", TestStatus.ERROR: "ERROR", TestStatus.SKIP: "SKIP"}
         icon = icons.get(result.status, "?")
         print(f"    {icon} {label}: {result.message}")
 
+        # Show label comparison
         if result.expected_labels:
-            print(f"         Expected labels: {result.expected_labels}")
+            print(f"         Expected labels:    {result.expected_labels}")
         if result.actual_labels:
-            print(f"         Actual labels:   {result.actual_labels}")
+            print(f"         Actual labels:    {result.actual_labels}")
         if result.actual_action:
-            print(f"         WAF Action:      {result.actual_action}")
+            print(f"         WAF Action:    {result.actual_action}")
 
     def _generate_coverage_report(self, name: str, results: list[TestResult], total_reqs: int) -> CoverageReport:
+        """Generate coverage report with breakdown by test type."""
         report = CoverageReport(policy_name=name, total_requirements=total_reqs, results=results)
 
         tested_reqs = set()
+
+        # Track counts by test type
         test_counts = {
             "positive": {"total": 0, "passed": 0},
             "size_block": {"total": 0, "passed": 0},
@@ -386,6 +414,7 @@ class WAFTestRunner:
         report.passed_requirements = len([r for r in results if r.status == TestStatus.PASS])
         report.failed_requirements = len([r for r in results if r.status == TestStatus.FAIL])
 
+        # Update legacy fields for backwards compatibility
         report.positive_tests = test_counts["positive"]["total"]
         report.positive_passed = test_counts["positive"]["passed"]
         report.negative_tests = test_counts["negative_uri"]["total"]
@@ -393,16 +422,22 @@ class WAFTestRunner:
         report.injection_tests = test_counts["gamification"]["total"]
         report.injection_passed = test_counts["gamification"]["passed"]
 
+        # Store size_block counts in report
         report._size_block_counts = test_counts["size_block"]
+
         return report
 
     def _print_coverage_report(self, report: CoverageReport):
+        """Print coverage summary."""
         total_tests = len(report.results)
         passed = len([r for r in report.results if r.status == TestStatus.PASS])
         failed = len([r for r in report.results if r.status == TestStatus.FAIL])
 
+        # Get size_block counts (TEST 2 + TEST 5)
+        size_counts = getattr(report, '_size_block_counts', {"total": 0, "passed": 0})
+
         print("\n" + "=" * 70)
-        print(f"COVERAGE REPORT (GET): {report.policy_name}")
+        print(f"COVERAGE REPORT: {report.policy_name}")
         print("=" * 70)
         print(f"Total Tests:      {total_tests}")
         print(f"  Passed:         {passed}")
@@ -441,6 +476,7 @@ class WAFTestRunner:
                 "duration_ms": r.duration_ms,
             })
 
+        # Build requirement metadata from configs
         requirements_meta = []
         for policy_name, config in self.configs.items():
             for req in config.requirements:
@@ -452,13 +488,13 @@ class WAFTestRunner:
                     "method": req.method,
                     "host": req.host,
                     "has_test_payload": req.test_config.test_payload is not None,
+                    "has_test_payload": req.test_config.test_payload is not None,
                     "expected_action": req.test_config.expected_action,
                 })
 
         json_report = {
             "timestamp": dt.utcnow().isoformat() + "Z",
             "waf_endpoint": self.waf_endpoint,
-            "method_profile": "GET",
             "summary": {
                 "policy": report.policy_name,
                 "total_requirements": report.total_requirements,
@@ -478,4 +514,5 @@ class WAFTestRunner:
         print(f"\nJSON report exported to: {output_path}")
 
     def close(self):
+        """Clean up."""
         self.http.close()
