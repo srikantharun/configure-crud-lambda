@@ -32,9 +32,6 @@ class TestWAFRequirements:
     def test_valid_request_allowed(self, test_runner, config, requirement):
           """TEST 1: Valid request should be allowed with FP label."""
           result = test_runner._test_positive(config, requirement)
-          # Persist the per-test result on the runner so the JSON auto-export
-          # in conftest.py:json_report_export has real data to write.
-          test_runner.results.append(result)
           self._print_result("TEST 1 POSITIVE", result)
           assert result.status.value == "pass", f"Failed: {result.message}"
 

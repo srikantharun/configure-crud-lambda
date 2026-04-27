@@ -16,13 +16,6 @@ from .waf.test_runner import WAFTestRunner
 # Path to modules directory (relative to repo root)
 MODULES_ROOT = Path(__file__).parent.parent / "modules"
 
-# YAML filename per HTTP method profile
-REQUIREMENTS_FILENAME_BY_METHOD = {
-    "post": "waf_requirements.yaml",
-    "get":  "waf_requirements_get.yaml",
-    "put":  "waf_requirements_put.yaml",
-}
-
 
 def pytest_addoption(parser):
     """Add custom CLI options for WAF testing."""
@@ -75,17 +68,6 @@ def pytest_addoption(parser):
         default=80.0,
         help="Minimum coverage percentage required to pass",
     )
-    parser.addoption(
-        "--method",
-        action="store",
-        choices=["get", "post", "put"],
-        default=os.getenv("WAF_TEST_METHOD", "post"),
-        help=(
-            "HTTP method profile: 'post' loads waf_requirements.yaml, "
-            "'get' loads waf_requirements_get.yaml, "
-            "'put' loads waf_requirements_put.yaml"
-        ),
-    )
 
 
 def pytest_configure(config):
@@ -102,7 +84,6 @@ def pytest_configure(config):
 @pytest.fixture(scope="session")
 def session_config(request) -> dict:
     """Gather all CLI options into a config dict."""
-    method = request.config.getoption("--method")
     return {
         "waf_endpoint": request.config.getoption("--waf-endpoint"),
         "waf_log_group": request.config.getoption("--waf-log-group"),
@@ -111,8 +92,6 @@ def session_config(request) -> dict:
         "owasp_namespace": request.config.getoption("--owasp-namespace"),
         "module_filter": request.config.getoption("--waf-module"),
         "coverage_threshold": request.config.getoption("--coverage-threshold"),
-        "method": method,
-        "requirements_filename": REQUIREMENTS_FILENAME_BY_METHOD[method],
     }
 
 
@@ -143,7 +122,6 @@ def test_runner(session_config) -> Iterator[WAFTestRunner]:
         account_id=session_config["account_id"],
         owasp_namespace=session_config["owasp_namespace"],
         modules_root=MODULES_ROOT,
-        requirements_filename=session_config["requirements_filename"],
     )
     runner.discover_configs()
     yield runner
@@ -152,42 +130,32 @@ def test_runner(session_config) -> Iterator[WAFTestRunner]:
 
 @pytest.fixture(scope="session", autouse=True)
 def json_report_export(request, test_runner, session_config):
-    """Auto-export JSON report after all tests if --json-report is set.
-
-    Test cases append their TestResult to test_runner.results (see
-    test_waf_requirements.py); we use those directly instead of re-running.
-    """
+    """Auto-export JSON report after all tests if --json-report is set."""
     yield
     json_path = request.config.getoption("--json-report")
-    if not json_path:
-        return
-
-    module_filter = session_config.get("module_filter")
-    total_reqs = sum(len(c.requirements) for c in test_runner.configs.values())
-
-    if test_runner.results:
+    if json_path:
+        module_filter = session_config.get("module_filter")
         report = test_runner._generate_coverage_report(
             module_filter or "all",
-            test_runner.results,
-            total_reqs,
+            test_runner.results if test_runner.results else [],
+            sum(len(c.requirements) for c in test_runner.configs.values()),
         )
-    else:
-        # No per-test results captured (e.g. tests collected but skipped).
-        # Fall back to a fresh run so the report isn't empty.
-        report = test_runner.run_all_tests(policy_filter=module_filter)
+        # Collect results from the test runner's stored results
+        # Results are stored in _run_policy_tests, so we re-generate from configs
+        if not report.results:
+            report = test_runner.run_all_tests(policy_filter=module_filter)
+        test_runner.export_json_report(report, json_path)
 
-    test_runner.export_json_report(report, json_path)
 
-
-def discover_configs(module_filter: str = None, requirements_filename: str = "waf_requirements.yaml") -> list[tuple[WAFTestConfig, str]]:
-    """Discover requirements YAMLs (configurable filename) from modules directory."""
+def discover_configs(module_filter: str=None) -> list[tuple[WAFTestConfig, str]]:
+    """Discover all waf_requirements.yaml files from modules directory."""
     configs = []
 
     if not MODULES_ROOT.exists():
         print(f"Warning: Modules root not found: {MODULES_ROOT}")
         return configs
 
-    for yaml_file in MODULES_ROOT.rglob(requirements_filename):
+    for yaml_file in MODULES_ROOT.rglob("waf_requirements.yaml"):
         policy_name = yaml_file.parent.name
 
         if module_filter and policy_name != module_filter:
@@ -214,11 +182,9 @@ def pytest_generate_tests(metafunc):
     """Dynamically parametrize tests based on discovered configs."""
     if "config" in metafunc.fixturenames and "requirement" in metafunc.fixturenames:
         module_filter = metafunc.config.getoption("--waf-module")
-        method = metafunc.config.getoption("--method")
-        requirements_filename = REQUIREMENTS_FILENAME_BY_METHOD[method]
 
         params = []
-        for config, policy_name in discover_configs(module_filter, requirements_filename):
+        for config, policy_name in discover_configs(module_filter):
             for req in config.requirements:
                 params.append(pytest.param(
                     config,
