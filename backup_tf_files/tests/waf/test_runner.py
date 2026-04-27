@@ -31,18 +31,19 @@ from .http_client import WAFHttpClient, WAFRequest
 from .cloudwatch_client import CloudWatchWAFClient
 
 
-REQUIREMENTS_FILENAME = "waf_requirements_get.yaml"
+DEFAULT_REQUIREMENTS_FILENAME = "waf_requirements.yaml"
 
 
 class WAFTestRunner:
     """
-    GET-method test runner for WAF policy verification.
+    Method-aware WAF test runner.
 
-    Same public class name and surface as tests.waf.test_runner.WAFTestRunner so
-    existing importers (`from tests.waf.test_runner_get import WAFTestRunner`)
-    work without code changes. Differences vs the POST runner:
-      - Discovers `waf_requirements_get.yaml` only.
-      - Routes payloads through the query string (no body) on GET.
+    POST requirements (legacy): payload placed in JSON body of `/rest/user/login`.
+    GET  requirements        : payload URL-encoded into a query parameter; no body.
+
+    The YAML filename to discover is configurable via `requirements_filename`,
+    so a single runner can drive either a POST suite (`waf_requirements.yaml`)
+    or a GET suite (`waf_requirements_get.yaml`).
     """
 
     MAX_HEADER_SIZE_BYTES = 8 * 1024  # 8KB
@@ -58,12 +59,14 @@ class WAFTestRunner:
         owasp_namespace: str = "owasp",
         modules_root: Optional[Path] = None,
         negative_uri_prefix: str = "/mytest",
+        requirements_filename: str = DEFAULT_REQUIREMENTS_FILENAME,
     ):
         self.waf_endpoint = waf_endpoint
         self.cloudwatch_log_group = cloudwatch_log_group
         self.account_id = account_id
         self.owasp_namespace = owasp_namespace
         self.negative_uri_prefix = negative_uri_prefix
+        self.requirements_filename = requirements_filename
 
         parsed = urlparse(waf_endpoint)
         self.waf_host = parsed.netloc or parsed.path.split('/')[0]
@@ -80,14 +83,14 @@ class WAFTestRunner:
         self.configs: dict[str, WAFTestConfig] = {}
 
     def discover_configs(self) -> dict[str, WAFTestConfig]:
-        """Discover waf_requirements_get.yaml files from modules directory."""
+        """Discover requirements YAML files from modules directory."""
         configs = {}
 
         if not self.modules_root.exists():
             print(f"Warning: Modules root not found: {self.modules_root}")
             return configs
 
-        for yaml_file in self.modules_root.rglob(REQUIREMENTS_FILENAME):
+        for yaml_file in self.modules_root.rglob(self.requirements_filename):
             policy_name = yaml_file.parent.name
 
             try:
@@ -102,7 +105,7 @@ class WAFTestRunner:
                     req.source_file = str(yaml_file)
 
                 configs[policy_name] = config
-                print(f"  Loaded: {policy_name} ({len(config.requirements)} requirements) [GET]")
+                print(f"  Loaded: {policy_name} ({len(config.requirements)} requirements) [{self.requirements_filename}]")
 
             except Exception as e:
                 print(f"  Warning: Failed to load {yaml_file}: {e}")
@@ -225,7 +228,10 @@ class WAFTestRunner:
             if req.test_config.test_query:
                 uri = f"{req.uri}?{req.test_config.test_query}"
             elif payload is not None:
-                uri = f"{req.uri}?q={quote(str(payload), safe='')}"
+                if is_get:
+                    uri = f"{req.uri}?q={quote(str(payload), safe='')}"
+                else:
+                    uri = f"{req.uri}?q={payload}"  # raw, matches legacy POST behaviour
             if not is_get and payload is not None:
                 body = json.dumps({"email": str(payload), "password": "test"})
 
