@@ -12,6 +12,7 @@ Differences vs test_runner.py:
 from __future__ import annotations
 
 import json
+import os
 import time
 import yaml
 from datetime import datetime
@@ -215,8 +216,10 @@ class WAFTestRunner:
         elif tuning_type in ("xss", "cmdi", "lfi", "rfi", "ssti", "base64"):
             payload = req.test_config.test_payload
             if payload is not None:
-                if is_get:
+                if is_get and not os.getenv("WAF_TEST_GET_WITH_BODY"):
                     uri = f"{req.uri}?q={quote(str(payload), safe='')}"
+                elif is_get:
+                    body = json.dumps({"q": str(payload)})
                 else:
                     body = json.dumps({"email": str(payload), "password": "test"})
 
@@ -224,15 +227,16 @@ class WAFTestRunner:
             payload = req.test_config.test_payload
             if req.test_config.test_query:
                 uri = f"{req.uri}?{req.test_config.test_query}"
-            elif payload is not None:
+            elif payload is not None and not (is_get and os.getenv("WAF_TEST_GET_WITH_BODY")):
                 uri = f"{req.uri}?q={quote(str(payload), safe='')}"
-            if not is_get and payload is not None:
+            if payload is not None and (not is_get or os.getenv("WAF_TEST_GET_WITH_BODY")):
                 body = json.dumps({"email": str(payload), "password": "test"})
 
         # ------------------------------------------------------------------
         # Final safety guard: GET must never carry a body
+        # (override with WAF_TEST_GET_WITH_BODY=1 for explicit GET-with-body experiments)
         # ------------------------------------------------------------------
-        if is_get and body is not None:
+        if is_get and body is not None and not os.getenv("WAF_TEST_GET_WITH_BODY"):
             body = None
 
         headers = dict(req.headers)
@@ -241,7 +245,7 @@ class WAFTestRunner:
         payload_summary = str(req.test_config.test_payload or "")[:50].replace("\n", " ")
         headers["X-Test-Payload"] = payload_summary
         # Strip body-related headers on GET so origin/CDN don't reject the request
-        if is_get:
+        if is_get and not os.getenv("WAF_TEST_GET_WITH_BODY"):
             headers.pop("Content-Type", None)
             headers.pop("Content-Length", None)
 
