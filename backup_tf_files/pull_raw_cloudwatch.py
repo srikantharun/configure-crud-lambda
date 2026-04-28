@@ -42,13 +42,17 @@ except ImportError:
 # ---------------------------------------------------------------------------
 DEFAULT_INPUT_DIR  = pathlib.Path(os.getenv("EVIDENCE_INPUT_DIR",  str(pathlib.Path("~/Downloads").expanduser())))
 DEFAULT_OUTPUT_DIR = pathlib.Path(os.getenv("EVIDENCE_OUTPUT_DIR", str(pathlib.Path("~/Downloads/evidence").expanduser())))
-REGION             = os.getenv("AWS_REGION", "eu-west-1")
+
+# CloudFront WAF logs ALWAYS live in us-east-1 (CloudFront is a global service);
+# ALB WAF logs live in the ALB's own region.
+CF_REGION  = os.getenv("WAF_CF_REGION",  "us-east-1")
+ALB_REGION = os.getenv("WAF_ALB_REGION", os.getenv("AWS_REGION", "eu-west-1"))
 
 CF_LOG_GROUP  = os.getenv("WAF_CF_LOG_GROUP",  "aws-waf-logs-baseline13")
 ALB_LOG_GROUP = os.getenv("WAF_ALB_LOG_GROUP", "aws-waf-logs-wpb-jenkins")
 
 # Time window around each run's validate.json timestamp
-LOOKBACK_HOURS = 4
+LOOKBACK_HOURS = 168   # 7 days back from validate.json timestamp
 LOOKAHEAD_HOURS = 1
 
 # (run_profile, source_json)
@@ -116,14 +120,14 @@ def pull_events(client, log_group: str, request_id: str,
     return events
 
 
-def process_request(client, raw_dir: pathlib.Path, run_profile: str, request_id: str,
-                    start_ms: int, end_ms: int) -> dict:
+def process_request(cf_client, alb_client, raw_dir: pathlib.Path, run_profile: str,
+                    request_id: str, start_ms: int, end_ms: int) -> dict:
     out_dir = raw_dir / run_profile
     out_dir.mkdir(parents=True, exist_ok=True)
     cf_path  = out_dir / f"{request_id}.cf.json"
     alb_path = out_dir / f"{request_id}.alb.json"
-    cf  = pull_events(client, CF_LOG_GROUP,  request_id, start_ms, end_ms)
-    alb = pull_events(client, ALB_LOG_GROUP, request_id, start_ms, end_ms)
+    cf  = pull_events(cf_client,  CF_LOG_GROUP,  request_id, start_ms, end_ms)
+    alb = pull_events(alb_client, ALB_LOG_GROUP, request_id, start_ms, end_ms)
     cf_path.write_text(json.dumps(cf, indent=2, default=str))
     alb_path.write_text(json.dumps(alb, indent=2, default=str))
     return {
@@ -161,9 +165,8 @@ def main():
 
     selected = set(args.profiles.split(","))
     verdict_filter = {v.strip() for v in args.verdicts.split(",") if v.strip()}
-    print(f"Region:        {REGION}")
-    print(f"CF log group:  {CF_LOG_GROUP}")
-    print(f"ALB log group: {ALB_LOG_GROUP}")
+    print(f"CF  region:    {CF_REGION}  (log group: {CF_LOG_GROUP})")
+    print(f"ALB region:    {ALB_REGION}  (log group: {ALB_LOG_GROUP})")
     print(f"Input dir:     {input_dir}")
     print(f"Output dir:    {output_dir}")
     print(f"Profiles:      {sorted(selected)}")
@@ -174,12 +177,13 @@ def main():
 
     # Verify creds
     try:
-        sts = boto3.client("sts", region_name=REGION).get_caller_identity()
+        sts = boto3.client("sts", region_name=ALB_REGION).get_caller_identity()
         print(f"AWS account: {sts['Account']} / arn: {sts['Arn']}\n")
     except NoCredentialsError:
         sys.exit("ERROR: no AWS credentials. Run `aws configure` or export AWS_PROFILE.")
 
-    logs = boto3.client("logs", region_name=REGION)
+    cf_logs  = boto3.client("logs", region_name=CF_REGION)
+    alb_logs = boto3.client("logs", region_name=ALB_REGION)
 
     index_path = output_dir / "raw_logs_index.csv"
     index_rows = [["run_profile", "request_id", "test_id", "verdict",
@@ -209,7 +213,7 @@ def main():
 
         results = []
         with ThreadPoolExecutor(max_workers=args.workers) as ex:
-            futures = {ex.submit(process_request, logs, raw_dir, run_profile, rid,
+            futures = {ex.submit(process_request, cf_logs, alb_logs, raw_dir, run_profile, rid,
                                  start_ms, end_ms): rid for rid in rids}
             for i, fut in enumerate(as_completed(futures), 1):
                 res = fut.result()
