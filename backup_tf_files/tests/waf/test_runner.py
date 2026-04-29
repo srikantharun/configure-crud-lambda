@@ -184,8 +184,18 @@ class WAFTestRunner:
         expected_action = req.test_config.expected_action or "ALLOW"
         is_get = (req.method or "").upper() == "GET"
 
+        # Resolve GET payload placement: query (default), body, cookie, uri.
+        # Backwards-compat: WAF_TEST_GET_WITH_BODY=1 implies placement="body".
+        def _resolve_placement():
+            p = (os.getenv("WAF_TEST_GET_PLACEMENT") or "").strip().lower()
+            if p in ("query", "body", "cookie", "uri"):
+                return p
+            return "body" if os.getenv("WAF_TEST_GET_WITH_BODY") else "query"
+        placement = _resolve_placement() if is_get else None
+
         uri = req.uri
         body = None
+        cookie_payload = None
 
         def load_data_file(file_path: str) -> Optional[str]:
             path = Path(file_path).expanduser()
@@ -216,10 +226,16 @@ class WAFTestRunner:
         elif tuning_type in ("xss", "cmdi", "lfi", "rfi", "ssti", "base64"):
             payload = req.test_config.test_payload
             if payload is not None:
-                if is_get and not os.getenv("WAF_TEST_GET_WITH_BODY"):
-                    uri = f"{req.uri}?q={quote(str(payload), safe='')}"
-                elif is_get:
-                    body = json.dumps({"q": str(payload)})
+                if is_get:
+                    encoded = quote(str(payload), safe='')
+                    if placement == "query":
+                        uri = f"{req.uri}?q={encoded}"
+                    elif placement == "body":
+                        body = json.dumps({"q": str(payload)})
+                    elif placement == "cookie":
+                        cookie_payload = f"q={encoded}"
+                    elif placement == "uri":
+                        uri = f"{req.uri.rstrip('/')}/{encoded}"
                 else:
                     body = json.dumps({"email": str(payload), "password": "test"})
 
@@ -227,16 +243,26 @@ class WAFTestRunner:
             payload = req.test_config.test_payload
             if req.test_config.test_query:
                 uri = f"{req.uri}?{req.test_config.test_query}"
-            elif payload is not None and not (is_get and os.getenv("WAF_TEST_GET_WITH_BODY")):
-                uri = f"{req.uri}?q={quote(str(payload), safe='')}"
-            if payload is not None and (not is_get or os.getenv("WAF_TEST_GET_WITH_BODY")):
-                body = json.dumps({"email": str(payload), "password": "test"})
+            elif payload is not None:
+                if is_get:
+                    encoded = quote(str(payload), safe='')
+                    if placement == "query":
+                        uri = f"{req.uri}?q={encoded}"
+                    elif placement == "body":
+                        body = json.dumps({"email": str(payload), "password": "test"})
+                    elif placement == "cookie":
+                        cookie_payload = f"q={encoded}"
+                    elif placement == "uri":
+                        uri = f"{req.uri.rstrip('/')}/{encoded}"
+                else:
+                    uri = f"{req.uri}?q={quote(str(payload), safe='')}"
+                    body = json.dumps({"email": str(payload), "password": "test"})
 
         # ------------------------------------------------------------------
-        # Final safety guard: GET must never carry a body
-        # (override with WAF_TEST_GET_WITH_BODY=1 for explicit GET-with-body experiments)
+        # Final safety guard: GET only carries a body when placement == "body"
+        # (placement is resolved from WAF_TEST_GET_PLACEMENT or WAF_TEST_GET_WITH_BODY)
         # ------------------------------------------------------------------
-        if is_get and body is not None and not os.getenv("WAF_TEST_GET_WITH_BODY"):
+        if is_get and body is not None and placement != "body":
             body = None
 
         headers = dict(req.headers)
@@ -244,10 +270,13 @@ class WAFTestRunner:
         headers["X-Test-Category"] = tuning_type
         payload_summary = str(req.test_config.test_payload or "")[:50].replace("\n", " ")
         headers["X-Test-Payload"] = payload_summary
-        # Strip body-related headers on GET so origin/CDN don't reject the request
-        if is_get and not os.getenv("WAF_TEST_GET_WITH_BODY"):
+        # Strip body-related headers on GET unless placement="body"
+        if is_get and placement != "body":
             headers.pop("Content-Type", None)
             headers.pop("Content-Length", None)
+        # Cookie placement: single cookie, replaces any existing Cookie header
+        if cookie_payload:
+            headers["Cookie"] = cookie_payload
 
         request = WAFRequest(
             uri=uri,
