@@ -21,7 +21,7 @@ Tighter than the JSON-driven version -> fewer events scanned, faster, more relia
 
 Usage:
   python3 revised_pull_raw_cloudwatch.py
-  python3 revised_pull_raw_cloudwatch.py --profiles get_with_body --limit 5      # smoke
+  python3 revised_pull_raw_cloudwatch.py --profiles get_with_header --limit 5    # smoke
   python3 revised_pull_raw_cloudwatch.py --window-hours 24                       # widen window
   python3 revised_pull_raw_cloudwatch.py --mapping /path/to/request_id_mapping.csv
 """

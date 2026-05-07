@@ -3,11 +3,18 @@ WAF Test Runner (GET variant) - Executes GET-method test cases and generates cov
 
 Differences vs test_runner.py:
 - Discovers `waf_requirements_get.yaml` (not `waf_requirements.yaml`)
-- Payload placement is method-aware:
-    * xss/cmdi/lfi/rfi/ssti/base64 + GET -> payload URL-encoded into ?q=
-    * sqli + GET                         -> payload URL-encoded into ?q=, no body
-    * non-GET methods                    -> payload in JSON body (legacy POST behaviour preserved)
-- Body is force-cleared on GET requests so the WAF inspects QUERY_STRING only.
+- Payload placement (selectable via WAF_TEST_GET_PLACEMENT) for GET:
+    * query   (default) -> payload URL-encoded into ?q=
+    * cookie            -> payload URL-encoded into Cookie: q=
+    * uri               -> payload URL-encoded as a path segment after the uri
+    * header            -> payload injected ONLY into header $REQ_HEAD
+                           (default name: X-INJ-PAYLOAD); querystring is benign ?q=normal
+- GET_BODY is intentionally NOT supported: CloudFront rejects GET requests
+  that carry a body at the edge, so the variant produces no useful WAF verdict.
+- Body is force-cleared on GET requests so the WAF inspects only the chosen
+  placement.
+- Non-GET methods continue to send the payload in a JSON body
+  (legacy POST behaviour preserved).
 """
 from __future__ import annotations
 
@@ -184,18 +191,25 @@ class WAFTestRunner:
         expected_action = req.test_config.expected_action or "ALLOW"
         is_get = (req.method or "").upper() == "GET"
 
-        # Resolve GET payload placement: query (default), body, cookie, uri.
-        # Backwards-compat: WAF_TEST_GET_WITH_BODY=1 implies placement="body".
+        # Resolve GET payload placement: query (default), cookie, uri, header.
+        # GET_BODY is unsupported by design — CloudFront blocks GET-with-body
+        # at the edge, never reaching WAF.
         def _resolve_placement():
             p = (os.getenv("WAF_TEST_GET_PLACEMENT") or "").strip().lower()
-            if p in ("query", "body", "cookie", "uri"):
+            if p in ("query", "cookie", "uri", "header"):
                 return p
-            return "body" if os.getenv("WAF_TEST_GET_WITH_BODY") else "query"
+            if p == "body":
+                raise RuntimeError(
+                    "WAF_TEST_GET_PLACEMENT=body is unsupported: CloudFront "
+                    "rejects GET requests carrying a body at the edge."
+                )
+            return "query"
         placement = _resolve_placement() if is_get else None
 
         uri = req.uri
         body = None
         cookie_payload = None
+        header_payload = None  # set when placement == "header"
 
         def load_data_file(file_path: str) -> Optional[str]:
             path = Path(file_path).expanduser()
@@ -230,12 +244,13 @@ class WAFTestRunner:
                     encoded = quote(str(payload), safe='')
                     if placement == "query":
                         uri = f"{req.uri}?q={encoded}"
-                    elif placement == "body":
-                        body = json.dumps({"q": str(payload)})
                     elif placement == "cookie":
                         cookie_payload = f"q={encoded}"
                     elif placement == "uri":
                         uri = f"{req.uri.rstrip('/')}/{encoded}"
+                    elif placement == "header":
+                        uri = f"{req.uri}?q=normal"
+                        header_payload = str(payload)
                 else:
                     body = json.dumps({"email": str(payload), "password": "test"})
 
@@ -248,35 +263,44 @@ class WAFTestRunner:
                     encoded = quote(str(payload), safe='')
                     if placement == "query":
                         uri = f"{req.uri}?q={encoded}"
-                    elif placement == "body":
-                        body = json.dumps({"email": str(payload), "password": "test"})
                     elif placement == "cookie":
                         cookie_payload = f"q={encoded}"
                     elif placement == "uri":
                         uri = f"{req.uri.rstrip('/')}/{encoded}"
+                    elif placement == "header":
+                        uri = f"{req.uri}?q=normal"
+                        header_payload = str(payload)
                 else:
                     uri = f"{req.uri}?q={quote(str(payload), safe='')}"
                     body = json.dumps({"email": str(payload), "password": "test"})
 
         # ------------------------------------------------------------------
-        # Final safety guard: GET only carries a body when placement == "body"
-        # (placement is resolved from WAF_TEST_GET_PLACEMENT or WAF_TEST_GET_WITH_BODY)
+        # Final safety guard: GET requests must never carry a body (the body
+        # placement was removed because CloudFront rejects it at the edge).
         # ------------------------------------------------------------------
-        if is_get and body is not None and placement != "body":
+        if is_get and body is not None:
             body = None
 
         headers = dict(req.headers)
         headers["X-Test-Id"] = req.id
         headers["X-Test-Category"] = tuning_type
-        payload_summary = str(req.test_config.test_payload or "")[:50].replace("\n", " ")
-        headers["X-Test-Payload"] = payload_summary
-        # Strip body-related headers on GET unless placement="body"
-        if is_get and placement != "body":
+        # NOTE: X-Test-Payload header intentionally NOT set. The payload would
+        # otherwise show up as a header value to the WAF and create attribution
+        # ambiguity (rule could match the metadata header instead of the
+        # placement under test). X-Test-Id alone is enough to correlate logs.
+        # Strip body-related headers on GET (no GET variant carries a body).
+        if is_get:
             headers.pop("Content-Type", None)
             headers.pop("Content-Length", None)
         # Cookie placement: single cookie, replaces any existing Cookie header
         if cookie_payload:
             headers["Cookie"] = cookie_payload
+        # Header placement: payload goes ONLY in the configured injection
+        # header (REQ_HEAD env var, default X-INJ-PAYLOAD). Strip CR/LF since
+        # urllib3 rejects them as header-injection vectors.
+        if header_payload is not None:
+            inj_header = os.getenv("REQ_HEAD", "X-INJ-PAYLOAD")
+            headers[inj_header] = header_payload.replace("\r", " ").replace("\n", " ")
 
         request = WAFRequest(
             uri=uri,

@@ -60,7 +60,9 @@ SOURCES = [
     ("post_run1",       "validate_log_baseline13.json"),
     ("post_run2",       "validate_log_baseline13-POST.json"),
     ("get_querystring", "validate_log_baseline13_get.json"),
-    ("get_with_body",   "validate_evidence_get_with_body.json"),
+    ("get_with_cookie", "validate_evidence_get_with_cookie.json"),
+    ("get_with_url",    "validate_evidence_get_with_url.json"),
+    ("get_with_header", "validate_evidence_get_with_header.json"),
 ]
 
 # ---------------------------------------------------------------------------
