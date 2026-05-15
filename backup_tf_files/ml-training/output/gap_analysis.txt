@@ -1,0 +1,160 @@
+================================================================================
+WAF BASELINE 1.3 GAP ANALYSIS
+What 1.3 is missing that 1.1 has, and how to close the gap
+================================================================================
+
+CONTEXT
+-------
+Test campaigns across 5 request placements (POST / GET querystring / GET cookie
+/ GET URI / GET X-INJ header) on a 344-payload Juice Shop corpus indicated that
+baseline 1.1 was matching or beating baseline 1.3 on several variants. A direct
+diff of the two FMS policies (aws_fms_policy "baseline_1_1_block" vs
+"baseline_1_3_global_block") explains why.
+
+
+RULE-GROUP INVENTORY DIFF
+-------------------------
+
+Component                                           Baseline 1.1   Baseline 1.3
+--------------------------------------------------- -------------  ------------
+waf_rg_ip_blacklist                                 BLOCK          BLOCK
+waf_rg_log4j                                        absent         BLOCK
+waf_rg_size_restrictions (custom)                   absent         BLOCK
+waf_rg_cyberwasp (custom)                           absent         BLOCK
+waf_rg_react (custom)                               BLOCK          ABSENT
+eps_custom_rules (custom)                           BLOCK          ABSENT
+waf_rg_hsbc_custom_v3 (legacy OWASP v2)             absent         BLOCK
+AWSManagedRulesCommonRuleSet                        v1.17 BLOCK    v1.20 BLOCK
+   - SizeRestrictions_QUERYSTRING                   COUNT          BLOCK
+   - SizeRestrictions_Cookie_HEADER                 COUNT          BLOCK
+   - SizeRestrictions_BODY                          COUNT          BLOCK
+   - SizeRestrictions_URIPATH                       COUNT          BLOCK
+   - NoUserAgent_HEADER                             COUNT          COUNT
+AWSManagedRulesSQLiRuleSet                          v2.0 BLOCK     v2.0 BLOCK
+AWSManagedRulesKnownBadInputsRuleSet                v1.22 BLOCK    COMMENTED OUT
+AWSManagedRulesAdminProtectionRuleSet               v1.1 BLOCK     v1.1 BLOCK
+AWSManagedRulesWindowsRuleSet                       v2.3 BLOCK     v2.3 BLOCK
+AWSManagedRulesLinuxRuleSet                         v2.6 BLOCK     v2.6 BLOCK
+AWSManagedRulesUnixRuleSet                          v3.0 BLOCK     v3.2 BLOCK
+AWSManagedRulesPHPRuleSet                           v2.1 BLOCK     v2.1 BLOCK
+AWSManagedRulesWordPressRuleSet                     v1.3 BLOCK     v1.3 BLOCK
+
+
+PRIMARY GAP - "AWSManagedRulesKnownBadInputsRuleSet" commented out in 1.3
+-------------------------------------------------------------------------
+
+In baseline_1_3_global_block the KnownBadInputs block is fully commented out.
+Two problems:
+
+  1. It is the ONLY AWS managed rule group present in 1.1 but absent in 1.3.
+     Every other AWS managed rule appears in both - usually with 1.3 on the
+     same or a newer version. Removing KnownBadInputs is a strict subtraction
+     from detection coverage.
+
+  2. Even if uncommented as-is, it will not validate. The name in the comment
+     is "AWSManagedRulesKnownBadInputRuleSet" - missing the trailing 's'. The
+     correct AWS name (and the one 1.1 uses) is:
+
+        AWSManagedRulesKnownBadInputsRuleSet
+
+     This is almost certainly why it was commented out in the first place:
+     someone tried to enable it, hit a Terraform validation error from the
+     typo, and shelved it instead of fixing it.
+
+What KnownBadInputs catches that the other rule groups in 1.3 do not:
+
+  - Specific CVE / exploit-framework signatures (Struts, JBoss, etc.)
+  - JNDI / log4j patterns (you cover this separately, but defence-in-depth)
+  - Malformed protocol / encoding patterns
+  - A range of RFI / SSRF URL families that overlap with - but extend -
+    what waf_rg_hsbc_custom_v3 catches
+  - Encoded SQLi/XSS bypass families that CommonRuleSet alone misses
+
+
+SECONDARY GAPS - two custom rule groups present in 1.1 only
+-----------------------------------------------------------
+
+  - module.waf_rg_react
+      Likely contents: React-specific exploit patterns (JSX, prototype
+      pollution, dangerouslySetInnerHTML, eval-style XSS vectors). If any of
+      your XSS test IDs use React-style payloads such as
+      "setTimeout('alert(1)')" or "new Function('alert(1)')()" this is what
+      catches them. Worth reading the module source and deciding whether to
+      port it into 1.3.
+
+  - module.eps_custom_rules
+      Likely contents: HSBC / EPS-specific custom signatures tuned over time.
+      Unknown without reading the module - but its absence is a real
+      coverage delta and worth investigating before signing off on 1.3.
+
+
+MINOR DIFFERENCES - likely net wash but flagged for completeness
+----------------------------------------------------------------
+
+  - CommonRuleSet v1.20 (1.3) vs v1.17 (1.1) - 1.3 has the newer version,
+    which should be at least as strong. AWS does occasionally regress specific
+    signatures across CRS minor versions, but unusual.
+
+  - UnixRuleSet v3.2 (1.3) vs v3.0 (1.1) - same situation, newer is normally
+    better.
+
+  - The four SizeRestrictions sub-rules of CRS are BLOCK in 1.3 vs COUNT in
+    1.1. This is a STRICTER posture in 1.3, not a gap. It can however trigger
+    additional false positives on legitimate large requests - worth keeping in
+    mind when evaluating positive-control results.
+
+
+PRIORITISED ACTION LIST FOR BASELINE 1.3
+----------------------------------------
+
+  1. (high impact) Uncomment "AWSManagedRulesKnownBadInputsRuleSet" and fix
+     the name typo. Place the block right after the SQLi rule group to match
+     1.1 ordering. See attached baseline_1.3.tf.
+
+  2. (medium impact) Read the contents of module.waf_rg_react and
+     module.eps_custom_rules. For each, decide whether the patterns it matches
+     are already covered by 1.3's customs (log4j / size_restrictions /
+     cyberwasp / hsbc_custom_v3) or whether they need a 1.3 port.
+
+  3. (low / monitor) Watch for any unexpected CommonRuleSet v1.17 -> v1.20
+     regressions in the re-run. If the post-fix 1.3 still loses against 1.1
+     on a specific test ID, narrow the cause to a specific CRS sub-rule by
+     reading the terminating_rule_id field in the validate evidence.
+
+
+POST-FIX EXPECTED OUTCOME
+-------------------------
+
+After enabling KnownBadInputs:
+
+  - Baseline 1.3 should become a strict superset of 1.1's AWS-managed coverage.
+    Any remaining 1.1 advantage must then come from waf_rg_react /
+    eps_custom_rules - which is a closeable gap once you read those modules.
+
+  - The 11 test IDs we previously identified as "baseline 1.3 catches but
+    baseline 1.1 misses" (RFI URLs juiceshop-0168/0174/0179/0180/0181;
+    pseudo-protocol LFI juiceshop-0153/0158; overlong-UTF traversal
+    juiceshop-0163; cmdi juiceshop-0133/0136) will remain 1.3-only wins.
+
+  - The 39 patterns where 1.1 appeared to beat 1.3 on GET-QS / GET-Header
+    runs are explained by duplicate-content artefacts in those JSON files
+    (placement env var probably not varied across the 1.1 runs). Once the
+    1.0 run is done with WAF_TEST_GET_PLACEMENT actually varied and 1.3 has
+    the KnownBadInputs fix applied, the apparent 1.1 advantage on those
+    placements should disappear.
+
+
+ATTACHED FILE
+-------------
+
+  baseline_1.3.tf
+      A drop-in corrected version of aws_fms_policy "baseline_1_3_global_block".
+      The only differences from your original are:
+        a) "AWSManagedRulesKnownBadInputsRuleSet" v1.22 added (correctly named)
+           and placed immediately after the SQLi rule group
+        b) The commented-out "KNOWN BAD INPUTS" block removed
+      Everything else - module references, version pins, overrideAction values,
+      ordering of the other rule groups, the associationConfig block, tags,
+      include_map, lifecycle - is preserved byte-for-byte.
+
+================================================================================
