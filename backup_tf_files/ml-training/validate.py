@@ -153,7 +153,7 @@ def validate_report(
             summary["cf_block"] += 1
         elif verdict == "CF_ALLOW_ALB_BLOCK":
             summary["cf_allow_alb_block"] += 1
-        elif verdict == "CF_ALLOW_ALB_ALLOW_BACKEND_CRASH":
+        elif verdict in ("CF_ALLOW_ALB_ALLOW", "CF_ALLOW_ALB_ALLOW_BACKEND_CRASH"):
             summary["cf_allow_alb_allow"] += 1
         elif verdict == "NO_CF_LOG":
             summary["no_cf_log"] += 1
