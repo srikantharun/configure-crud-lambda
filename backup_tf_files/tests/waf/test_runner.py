@@ -204,7 +204,13 @@ class WAFTestRunner:
                     "rejects GET requests carrying a body at the edge."
                 )
             return "query"
-        placement = _resolve_placement() if is_get else None
+        # POST: two placements supported - 'body' (default) or 'query'.
+        # Payload must land in exactly ONE placement; never both (taint).
+        def _resolve_post_placement():
+            p = (os.getenv("WAF_TEST_POST_PLACEMENT") or "").strip().lower()
+            return p if p in ("body", "query") else "body"
+
+        placement = _resolve_placement() if is_get else _resolve_post_placement()
 
         uri = req.uri
         body = None
@@ -252,7 +258,12 @@ class WAFTestRunner:
                         uri = f"{req.uri}?q=normal"
                         header_payload = str(payload)
                 else:
-                    body = json.dumps({"email": str(payload), "password": "test"})
+                    # POST: payload in exactly ONE placement
+                    if placement == "query":
+                        uri = f"{req.uri}?q={quote(str(payload), safe='')}"
+                        body = json.dumps({"email": "user@example.com", "password": "test"})
+                    else:  # body (default)
+                        body = json.dumps({"email": str(payload), "password": "test"})
 
         elif tuning_type == "sqli":
             payload = req.test_config.test_payload
@@ -271,8 +282,15 @@ class WAFTestRunner:
                         uri = f"{req.uri}?q=normal"
                         header_payload = str(payload)
                 else:
-                    uri = f"{req.uri}?q={quote(str(payload), safe='')}"
-                    body = json.dumps({"email": str(payload), "password": "test"})
+                    # POST: payload in exactly ONE placement (was previously
+                    # placed in BOTH ?q= and /email - that tainted the test
+                    # and made it impossible to attribute the WAF block to a
+                    # single placement).
+                    if placement == "query":
+                        uri = f"{req.uri}?q={quote(str(payload), safe='')}"
+                        body = json.dumps({"email": "user@example.com", "password": "test"})
+                    else:  # body (default)
+                        body = json.dumps({"email": str(payload), "password": "test"})
 
         # ------------------------------------------------------------------
         # Final safety guard: GET requests must never carry a body (the body
