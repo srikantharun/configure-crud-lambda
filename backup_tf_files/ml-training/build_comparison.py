@@ -80,7 +80,11 @@ def parse_rule_short(rule_id):
 def load_run(json_path):
     if not os.path.exists(json_path):
         return None
-    d = json.loads(open(json_path).read(), strict=False)
+    # Tolerate non-breaking spaces (U+00A0) and a leading BOM that sneak in
+    # when JSON is copy-pasted through chat / rich-text editors; json.loads
+    # rejects U+00A0 as whitespace otherwise.
+    raw = open(json_path, encoding="utf-8-sig").read().replace(" ", " ")
+    d = json.loads(raw, strict=False)
     out = []
     for r in d["evidence"]:
         cf = r.get("cf_waf_log") or {}

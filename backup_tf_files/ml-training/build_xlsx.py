@@ -66,7 +66,8 @@ HEADERS_AUDIT = [
 
 POLICIES = ["1.1", "1.3", "1.3b"]
 PLACEMENTS = [
-    ("POST",       "post"),
+    ("POST-QS",    "post_qs"),
+    ("POST-Body",  "post_body"),
     ("GET-QS",     "get_qs"),
     ("GET-Cookie", "get_cookie"),
     ("GET-URI",    "get_uri"),
