@@ -2,7 +2,8 @@
 build_comparison.py
 ===================
 Generate the manager-facing comparison workbook that pivots
-validate_baseline_*.json across 1.1 / 1.3 / 1.3b and all 5 placements
+validate_baseline_*.json across 1.1 / 1.3 / 1.3b and all 6 placements
+(POST-QS, POST-Body, GET-QS, GET-Cookie, GET-URI, GET-Header)
 into a single XLSX with:
 
   - Definitions tab    how to read the workbook + known caveats
@@ -12,7 +13,7 @@ into a single XLSX with:
                        Unix, PHP, AdminProtection, WordPress, cyberwasp,
                        owasp-top10  each row is a test_id; cells are
                        nested-IF formulas resolved at open time
-  - 15 RAW tabs        one per (policy, placement) feeding the formulas
+  - 18 RAW tabs        one per (policy, placement) feeding the formulas
 
 Cells are colored green (both / 1.3 only) or red (1.1 only REGRESSION).
 Attribution shifts are intentionally blank.
@@ -37,9 +38,10 @@ from openpyxl.workbook.properties import CalcProperties
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-PLACEMENTS = ["post", "get_qs", "get_cookie", "get_uri", "get_header"]
+PLACEMENTS = ["post_qs", "post_body", "get_qs", "get_cookie", "get_uri", "get_header"]
 PLACEMENT_LABEL = {
-    "post": "POST", "get_qs": "GET-QS", "get_cookie": "GET-Cookie",
+    "post_qs": "POST-QS", "post_body": "POST-Body",
+    "get_qs": "GET-QS", "get_cookie": "GET-Cookie",
     "get_uri": "GET-URI", "get_header": "GET-Header",
 }
 POLICIES = ["1.1", "1.3", "1.3b"]
@@ -150,12 +152,12 @@ def write_definitions(ws, run_date):
     iso = f"{run_date[:4]}-{run_date[4:6]}-{run_date[6:]}"
     rows = [
         ("", ""),
-        ("Data date", f"Generated {iso} from validate_baseline_*.json (1.1, 1.3, 1.3b across 5 placements)."),
+        ("Data date", f"Generated {iso} from validate_baseline_*.json (1.1, 1.3, 1.3b across 6 placements: POST-QS, POST-Body, GET-QS, GET-Cookie, GET-URI, GET-Header)."),
         ("", ""),
         ("Tab order", ""),
         ("Summary", "Counts via COUNTIF formulas + CF_BLOCK share tables. Right-side block 'Where the leaks live' breaks down each (policy, placement) leak count by attack family (xss/sqli/cmdi/lfi/rfi/Uncategorized)."),
-        ("Common, SQLi, ...", "Per-ruleset analytics. Each row is a test_id. Columns C-G = 1.1 vs 1.3. Columns H-L = 1.1 vs 1.3b."),
-        ("RAW_<policy>_<placement>", "Raw data (15 tabs at the back) feeding the analytics."),
+        ("Common, SQLi, ...", "Per-ruleset analytics. Each row is a test_id. Columns C-H = 1.1 vs 1.3. Columns I-N = 1.1 vs 1.3b."),
+        ("RAW_<policy>_<placement>", "Raw data (18 tabs at the back) feeding the analytics."),
         ("", ""),
         ("Category values", ""),
         ("both", "Blocked by THIS ruleset in BOTH policies"),
@@ -167,8 +169,8 @@ def write_definitions(ws, run_date):
         ("", ""),
         ("Verify any cell", ""),
         ("Applies to", "The 11 per-ruleset tabs. Summary is a roll-up; RAW_* tabs are the inputs Step 2 sends you to."),
-        ("Step 1", "Pick the cell. Note test_id (col A) and placement from column header (C-G = 1.1 vs 1.3, H-L = 1.1 vs 1.3b)."),
-        ("Step 2", "Open the two matching RAW tabs. Example: column D (GET-QS) under '1.1 vs 1.3b' -> RAW_1.1_GET_QS and RAW_1.3b_GET_QS."),
+        ("Step 1", "Pick the cell. Note test_id (col A) and placement from column header (C-H = 1.1 vs 1.3, I-N = 1.1 vs 1.3b)."),
+        ("Step 2", "Open the two matching RAW tabs. Example: the POST-QS column under '1.1 vs 1.3b' -> RAW_1.1_POST_QS and RAW_1.3b_POST_QS."),
         ("Step 3", "Read request_id (col B) and rule (col D). Paste request_id into CW Logs Insights: fields @timestamp, action, terminatingRuleId | filter @message like /<request_id>/"),
     ]
     for r, (k, v) in enumerate(rows, start=2):
@@ -256,16 +258,20 @@ def build(src_dir, out_dir, run_date):
     df = wb.active; df.title = "Definitions"
     write_definitions(df, run_date)
 
+    n = len(PLACEMENTS)
+    b2_start = 3 + n              # first column of the "1.1 vs 1.3b" block
+    total_cols = 2 + 2 * n        # Test ID + Payload + N + N
+
     rule_sheets = []
     for rule_short, rule_full, ver1, ver3 in RULE_GROUPS:
         ws = wb.create_sheet(rule_short[:31])
         rule_sheets.append(rule_short[:31])
         ws.cell(row=1, column=1, value=f"{rule_full} | 1.1: {ver1} -> 1.3: {ver3}").font = Font(bold=True)
-        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=12)
+        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_cols)
         ws.cell(row=2, column=3, value="1.1 vs 1.3").font = FONT_BOLD
-        ws.cell(row=2, column=8, value="1.1 vs 1.3b").font = FONT_BOLD
-        ws.merge_cells(start_row=2, start_column=3, end_row=2, end_column=7)
-        ws.merge_cells(start_row=2, start_column=8, end_row=2, end_column=12)
+        ws.cell(row=2, column=b2_start, value="1.1 vs 1.3b").font = FONT_BOLD
+        ws.merge_cells(start_row=2, start_column=3, end_row=2, end_column=2 + n)
+        ws.merge_cells(start_row=2, start_column=b2_start, end_row=2, end_column=total_cols)
         col_hdrs = ["Test ID", "Payload"] + [PLACEMENT_LABEL[p] for p in PLACEMENTS] * 2
         for c, h in enumerate(col_hdrs, 1):
             cell = ws.cell(row=3, column=c, value=h); cell.font = FONT_HEADER; cell.fill = FILL_HEADER
@@ -276,17 +282,17 @@ def build(src_dir, out_dir, run_date):
             for ci, p in enumerate(PLACEMENTS, start=3):
                 ws.cell(row=ri, column=ci, value=nested_if_formula(
                     f'"{tid}"', f"RAW_1.1_{p.upper()}", f"RAW_1.3_{p.upper()}", rule_short))
-            for ci, p in enumerate(PLACEMENTS, start=8):
+            for ci, p in enumerate(PLACEMENTS, start=b2_start):
                 ws.cell(row=ri, column=ci, value=nested_if_formula(
                     f'"{tid}"', f"RAW_1.1_{p.upper()}", f"RAW_1.3b_{p.upper()}", rule_short))
 
         last_row = 3 + len(all_tids)
-        rng = f"C4:L{last_row}"
+        rng = f"C4:{get_column_letter(total_cols)}{last_row}"
         ws.conditional_formatting.add(rng, CellIsRule(operator="equal", formula=['"both"'], fill=FILL_GREEN))
         ws.conditional_formatting.add(rng, CellIsRule(operator="equal", formula=['"1.3 only"'], fill=FILL_GREEN))
         ws.conditional_formatting.add(rng, CellIsRule(operator="equal", formula=['"1.1 only (REGRESSION)"'], fill=FILL_RED))
 
-        widths = [16, 40] + [14] * 5 + [14] * 5
+        widths = [16, 40] + [14] * (2 * n)
         for i, w in enumerate(widths, 1):
             ws.column_dimensions[get_column_letter(i)].width = w
         ws.freeze_panes = "C4"
@@ -296,11 +302,14 @@ def build(src_dir, out_dir, run_date):
     hdrs = ["Ruleset", "Comparison", "both", "1.3 only", "1.1 only (REGRESSION)"]
     for c, h in enumerate(hdrs, 1):
         cell = sm.cell(row=3, column=c, value=h); cell.font = FONT_HEADER; cell.fill = FILL_HEADER
+    b1_first, b1_last = get_column_letter(3), get_column_letter(2 + n)
+    b2_first, b2_last = get_column_letter(b2_start), get_column_letter(total_cols)
     rr = 4
     for rule_short, *_ in RULE_GROUPS:
         sn = rule_short[:31]
         last = 3 + len(all_tids)
-        for cmp_label, col_range in [("1.1 vs 1.3", "$C$4:$G"), ("1.1 vs 1.3b", "$H$4:$L")]:
+        for cmp_label, col_range in [("1.1 vs 1.3", f"${b1_first}$4:${b1_last}"),
+                                     ("1.1 vs 1.3b", f"${b2_first}$4:${b2_last}")]:
             sm.cell(row=rr, column=1, value=rule_short)
             sm.cell(row=rr, column=2, value=cmp_label)
             sm.cell(row=rr, column=3, value=f"=COUNTIF('{sn}'!{col_range}{last},\"both\")")
@@ -312,8 +321,10 @@ def build(src_dir, out_dir, run_date):
     for i, w in enumerate([22, 14, 10, 12, 26], 1):
         sm.column_dimensions[get_column_letter(i)].width = w
 
+    n_tests = len(all_tids)
+    grand_total = n_tests * n
     rr += 2
-    sm.cell(row=rr, column=1, value="CF_BLOCK share by managed ruleset (% of 1720 = 344 tests x 5 placements)").font = Font(bold=True, size=12)
+    sm.cell(row=rr, column=1, value=f"CF_BLOCK share by managed ruleset (% of {grand_total} = {n_tests} tests x {n} placements)").font = Font(bold=True, size=12)
     rr += 1
     hdr2 = ["Ruleset", "1.1", "1.3", "1.3b"]
     for c, h in enumerate(hdr2, 1):
@@ -325,7 +336,7 @@ def build(src_dir, out_dir, run_date):
         for p in PLACEMENTS:
             raw = f"RAW_{pol}_{p.upper()}"
             parts.append(f'COUNTIFS({raw}!D:D,"{rule_short}",{raw}!C:C,"CF_BLOCK")')
-        return f"=({' + '.join(parts)})/1720"
+        return f"=({' + '.join(parts)})/{grand_total}"
 
     for rule_short, *_ in RULE_GROUPS:
         sm.cell(row=rr, column=1, value=rule_short)
@@ -335,7 +346,7 @@ def build(src_dir, out_dir, run_date):
         rr += 1
 
     rr += 2
-    sm.cell(row=rr, column=1, value="CF_BLOCK share by ruleset and placement (% of 344 per placement)").font = Font(bold=True, size=12)
+    sm.cell(row=rr, column=1, value=f"CF_BLOCK share by ruleset and placement (% of {n_tests} per placement)").font = Font(bold=True, size=12)
     rr += 1
     hdr3 = ["Ruleset", "Placement", "1.1", "1.3", "1.3b"]
     for c, h in enumerate(hdr3, 1):
@@ -344,7 +355,7 @@ def build(src_dir, out_dir, run_date):
 
     def _placement_share_formula(pol, rule_short, placement):
         raw = f"RAW_{pol}_{placement.upper()}"
-        return f'=COUNTIFS({raw}!D:D,"{rule_short}",{raw}!C:C,"CF_BLOCK")/344'
+        return f'=COUNTIFS({raw}!D:D,"{rule_short}",{raw}!C:C,"CF_BLOCK")/{n_tests}'
 
     for rule_short, *_ in RULE_GROUPS:
         for plc in PLACEMENTS:
