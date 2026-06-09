@@ -56,50 +56,37 @@ resource "aws_wafv2_ip_set" "blacklisted_ips" {
 # Consolidated regex pattern sets
 # -----------------------------------------------------------------------------
 
-# Pattern set 1: matches anything ending in "php"
-# Used by rule 3 (owasp-detect-php-insecure), group A.
+# Design split per Dean's spec:
+#   - byte_match in body / headers / cookies for the single most important
+#     literal patterns (item 1 "php", item 10 "://")
+#   - regex_pattern_set with `|` alternation in URI path / query string for
+#     ALL items (PHP signatures, PHP config strings, and RFI/LFI patterns)
+# This keeps WCU low (one regex statement covers many strings on URI/QS)
+# while keeping FP risk down on body/headers/cookies (byte_match is more
+# restrictive than regex alternation there).
+
+# Pattern set 1: matches anything ending in "php" - used by rule 3, group A,
+# on URI path and query string only.
 resource "aws_wafv2_regex_pattern_set" "owasp_php_extension" {
   name        = "owasp-php-extension-alpha"
   scope       = var.scope
-  description = "Matches strings ending with 'php' - PHP file extension detection"
+  description = "Matches strings ending with 'php' - PHP file extension detection (URI/QS only via this regex set; body/headers/cookies use byte_match)"
 
   regular_expression {
     regex_string = "php$"
   }
 }
 
-# Pattern set 2: PHP configuration directives that an attacker would set/probe
-# Used by rule 3, group B. Patterns are lowercase because the transforms chain
-# ends with LOWERCASE so matches become case-insensitive.
-# Includes _SERVER[ which the manager's table calls out for headers coverage too.
+# Pattern set 2: PHP config strings - all 8 folded into one regex with
+# alternation (Dean's WCU optimisation). Case-sensitive (uses _ENV[ and
+# _SERVER[ literally so no LOWERCASE transform is needed).
 resource "aws_wafv2_regex_pattern_set" "owasp_php_config_strings" {
   name        = "owasp-php-config-strings-alpha"
   scope       = var.scope
-  description = "Suspicious PHP config strings (disable_functions=, _ENV[, _SERVER[, allow_url_include=, safe_mode=, open_basedir=, auto_append_file=, auto_prepend_file=)"
+  description = "PHP config strings (8 strings as alternation) - used in URI / QS only"
 
   regular_expression {
-    regex_string = "disable_functions="
-  }
-  regular_expression {
-    regex_string = "_env\\["
-  }
-  regular_expression {
-    regex_string = "_server\\["
-  }
-  regular_expression {
-    regex_string = "allow_url_include="
-  }
-  regular_expression {
-    regex_string = "safe_mode="
-  }
-  regular_expression {
-    regex_string = "open_basedir="
-  }
-  regular_expression {
-    regex_string = "auto_append_file="
-  }
-  regular_expression {
-    regex_string = "auto_prepend_file="
+    regex_string = "disable_functions=|_ENV\\[|_SERVER\\[|allow_url_include=|safe_mode=|open_basedir=|auto_append_file=|auto_prepend_file="
   }
 }
 
@@ -109,17 +96,14 @@ resource "aws_wafv2_regex_pattern_set" "owasp_php_config_strings" {
 resource "aws_wafv2_regex_pattern_set" "owasp_rfi_lfi_signatures" {
   name        = "owasp-rfi-lfi-signatures-alpha"
   scope       = var.scope
-  description = "RFI/LFI signatures: '://' (URL scheme) and '../' (path traversal)"
+  description = "RFI/LFI signatures combined into one regex with alternation: '://' OR '../'."
 
   regular_expression {
-    regex_string = "://"
-  }
-  regular_expression {
-    regex_string = "\\.\\./"
+    regex_string = "://|\\.\\./"
   }
 }
 
-# Pattern set 4: HTTPS exemption - legitimate HTTPS URLs should not trip RFI rule
+# Pattern set 2: HTTPS exemption - legitimate HTTPS URLs should not trip RFI rule
 # Used inside rule 4's not_statement.
 resource "aws_wafv2_regex_pattern_set" "owasp_https_exempt" {
   name        = "owasp-https-exempt-alpha"
@@ -131,7 +115,7 @@ resource "aws_wafv2_regex_pattern_set" "owasp_https_exempt" {
   }
 }
 
-# Pattern set 5: MAUTH scheme exemption (used dynamically when allow_mauth = true)
+# Pattern set 3: MAUTH scheme exemption (used dynamically when allow_mauth = true)
 resource "aws_wafv2_regex_pattern_set" "owasp_mauth_exempt" {
   name        = "owasp-mauth-exempt-alpha"
   scope       = var.scope
@@ -356,48 +340,16 @@ resource "aws_wafv2_rule_group" "main" {
     statement {
       and_statement {
 
-        # -------------------------------------------------------------------
-        # Group A: PHP signature in any of 5 placements + "/" in URI path
-        # -------------------------------------------------------------------
+        # ---------------------------------------------------------------
+        # Group A: "php" signature
+        #   - regex on URI path + query_string (covers items 1 partial)
+        #   - byte_match on body / headers / cookies (Dean's spec)
+        #   - byte_match "/" on URI path (existing)
+        # ---------------------------------------------------------------
         statement {
           or_statement {
 
-            # 5 placements, all checking the "php$" pattern set with chained transforms
-            statement {
-              regex_pattern_set_reference_statement {
-                arn = aws_wafv2_regex_pattern_set.owasp_php_extension.arn
-
-                field_to_match {
-                  body {}
-                }
-
-                text_transformation {
-                  priority = 0
-                  type     = "URL_DECODE"
-                }
-                text_transformation {
-                  priority = 1
-                  type     = "HTML_ENTITY_DECODE"
-                }
-                text_transformation {
-                  priority = 2
-                  type     = "HEX_DECODE"
-                }
-                text_transformation {
-                  priority = 3
-                  type     = "BASE64_DECODE"
-                }
-                text_transformation {
-                  priority = 4
-                  type     = "UTF8_TO_UNICODE"
-                }
-                text_transformation {
-                  priority = 5
-                  type     = "LOWERCASE"
-                }
-              }
-            }
-
+            # 1. regex "php$" on URI path
             statement {
               regex_pattern_set_reference_statement {
                 arn = aws_wafv2_regex_pattern_set.owasp_php_extension.arn
@@ -426,13 +378,10 @@ resource "aws_wafv2_rule_group" "main" {
                   priority = 4
                   type     = "UTF8_TO_UNICODE"
                 }
-                text_transformation {
-                  priority = 5
-                  type     = "LOWERCASE"
-                }
               }
             }
 
+            # 2. regex "php$" on query_string
             statement {
               regex_pattern_set_reference_statement {
                 arn = aws_wafv2_regex_pattern_set.owasp_php_extension.arn
@@ -461,16 +410,86 @@ resource "aws_wafv2_rule_group" "main" {
                   priority = 4
                   type     = "UTF8_TO_UNICODE"
                 }
+              }
+            }
+
+            # 3. byte_match "php" ENDS_WITH on body
+            statement {
+              byte_match_statement {
+                positional_constraint = "ENDS_WITH"
+                search_string         = "php"
+
+                field_to_match {
+                  body {}
+                }
+
                 text_transformation {
-                  priority = 5
-                  type     = "LOWERCASE"
+                  priority = 0
+                  type     = "URL_DECODE"
+                }
+                text_transformation {
+                  priority = 1
+                  type     = "HTML_ENTITY_DECODE"
+                }
+                text_transformation {
+                  priority = 2
+                  type     = "HEX_DECODE"
+                }
+                text_transformation {
+                  priority = 3
+                  type     = "BASE64_DECODE"
+                }
+                text_transformation {
+                  priority = 4
+                  type     = "UTF8_TO_UNICODE"
                 }
               }
             }
 
+            # 4. byte_match "php" ENDS_WITH on all headers
             statement {
-              regex_pattern_set_reference_statement {
-                arn = aws_wafv2_regex_pattern_set.owasp_php_extension.arn
+              byte_match_statement {
+                positional_constraint = "ENDS_WITH"
+                search_string         = "php"
+
+                field_to_match {
+                  headers {
+                    match_pattern {
+                      all {}
+                    }
+                    match_scope       = "ALL"
+                    oversize_handling = "NO_MATCH"
+                  }
+                }
+
+                text_transformation {
+                  priority = 0
+                  type     = "URL_DECODE"
+                }
+                text_transformation {
+                  priority = 1
+                  type     = "HTML_ENTITY_DECODE"
+                }
+                text_transformation {
+                  priority = 2
+                  type     = "HEX_DECODE"
+                }
+                text_transformation {
+                  priority = 3
+                  type     = "BASE64_DECODE"
+                }
+                text_transformation {
+                  priority = 4
+                  type     = "UTF8_TO_UNICODE"
+                }
+              }
+            }
+
+            # 5. byte_match "php" ENDS_WITH on cookies
+            statement {
+              byte_match_statement {
+                positional_constraint = "ENDS_WITH"
+                search_string         = "php"
 
                 field_to_match {
                   cookies {
@@ -502,25 +521,43 @@ resource "aws_wafv2_rule_group" "main" {
                   priority = 4
                   type     = "UTF8_TO_UNICODE"
                 }
-                text_transformation {
-                  priority = 5
-                  type     = "LOWERCASE"
-                }
               }
             }
 
+            # 6. byte_match "/" ENDS_WITH on URI path (existing single-transform check)
             statement {
-              regex_pattern_set_reference_statement {
-                arn = aws_wafv2_regex_pattern_set.owasp_php_extension.arn
+              byte_match_statement {
+                positional_constraint = "ENDS_WITH"
+                search_string         = "/"
 
                 field_to_match {
-                  headers {
-                    match_pattern {
-                      all {}
-                    }
-                    match_scope       = "ALL"
-                    oversize_handling = "NO_MATCH"
-                  }
+                  uri_path {}
+                }
+
+                text_transformation {
+                  priority = 0
+                  type     = "URL_DECODE"
+                }
+              }
+            }
+          }
+        }
+
+        # ---------------------------------------------------------------
+        # Group B: PHP config strings (8 strings combined via alternation
+        # in one regex_pattern_set) on URI path + query string only.
+        # No body/headers/cookies coverage for config strings per Dean's spec.
+        # ---------------------------------------------------------------
+        statement {
+          or_statement {
+
+            # regex 8-string alternation on URI path
+            statement {
+              regex_pattern_set_reference_statement {
+                arn = aws_wafv2_regex_pattern_set.owasp_php_config_strings.arn
+
+                field_to_match {
+                  uri_path {}
                 }
 
                 text_transformation {
@@ -543,37 +580,10 @@ resource "aws_wafv2_rule_group" "main" {
                   priority = 4
                   type     = "UTF8_TO_UNICODE"
                 }
-                text_transformation {
-                  priority = 5
-                  type     = "LOWERCASE"
-                }
               }
             }
 
-            # The trailing "/" in URI path - kept as a byte_match since it's a single literal
-            statement {
-              byte_match_statement {
-                positional_constraint = "ENDS_WITH"
-                search_string         = "/"
-
-                field_to_match {
-                  uri_path {}
-                }
-
-                text_transformation {
-                  priority = 0
-                  type     = "URL_DECODE"
-                }
-              }
-            }
-          }
-        }
-
-        # -------------------------------------------------------------------
-        # Group B: any PHP config string in query_string OR headers
-        # -------------------------------------------------------------------
-        statement {
-          or_statement {
+            # regex 8-string alternation on query_string
             statement {
               regex_pattern_set_reference_statement {
                 arn = aws_wafv2_regex_pattern_set.owasp_php_config_strings.arn
@@ -601,51 +611,6 @@ resource "aws_wafv2_rule_group" "main" {
                 text_transformation {
                   priority = 4
                   type     = "UTF8_TO_UNICODE"
-                }
-                text_transformation {
-                  priority = 5
-                  type     = "LOWERCASE"
-                }
-              }
-            }
-
-            statement {
-              regex_pattern_set_reference_statement {
-                arn = aws_wafv2_regex_pattern_set.owasp_php_config_strings.arn
-
-                field_to_match {
-                  headers {
-                    match_pattern {
-                      all {}
-                    }
-                    match_scope       = "ALL"
-                    oversize_handling = "NO_MATCH"
-                  }
-                }
-
-                text_transformation {
-                  priority = 0
-                  type     = "URL_DECODE"
-                }
-                text_transformation {
-                  priority = 1
-                  type     = "HTML_ENTITY_DECODE"
-                }
-                text_transformation {
-                  priority = 2
-                  type     = "HEX_DECODE"
-                }
-                text_transformation {
-                  priority = 3
-                  type     = "BASE64_DECODE"
-                }
-                text_transformation {
-                  priority = 4
-                  type     = "UTF8_TO_UNICODE"
-                }
-                text_transformation {
-                  priority = 5
-                  type     = "LOWERCASE"
                 }
               }
             }
@@ -692,10 +657,14 @@ resource "aws_wafv2_rule_group" "main" {
       and_statement {
 
         # -------------------------------------------------------------------
-        # Group 1: RFI/LFI signature in 3 placements
+        # Group 1:
+        #   - regex `://|\.\./` on URI path + query_string (catches both patterns)
+        #   - byte_match `://` on body + headers + cookies (item 10 only, no `../`)
         # -------------------------------------------------------------------
         statement {
           or_statement {
+
+            # regex `://|\.\./` on query_string
             statement {
               regex_pattern_set_reference_statement {
                 arn = aws_wafv2_regex_pattern_set.owasp_rfi_lfi_signatures.arn
@@ -727,6 +696,7 @@ resource "aws_wafv2_rule_group" "main" {
               }
             }
 
+            # regex `://|\.\./` on uri_path
             statement {
               regex_pattern_set_reference_statement {
                 arn = aws_wafv2_regex_pattern_set.owasp_rfi_lfi_signatures.arn
@@ -758,12 +728,92 @@ resource "aws_wafv2_rule_group" "main" {
               }
             }
 
+            # byte_match `://` CONTAINS on body (item 10 only - `../` is NOT body-checked)
             statement {
-              regex_pattern_set_reference_statement {
-                arn = aws_wafv2_regex_pattern_set.owasp_rfi_lfi_signatures.arn
+              byte_match_statement {
+                positional_constraint = "CONTAINS"
+                search_string         = "://"
 
                 field_to_match {
                   body {}
+                }
+
+                text_transformation {
+                  priority = 0
+                  type     = "URL_DECODE"
+                }
+                text_transformation {
+                  priority = 1
+                  type     = "HTML_ENTITY_DECODE"
+                }
+                text_transformation {
+                  priority = 2
+                  type     = "HEX_DECODE"
+                }
+                text_transformation {
+                  priority = 3
+                  type     = "BASE64_DECODE"
+                }
+                text_transformation {
+                  priority = 4
+                  type     = "UTF8_TO_UNICODE"
+                }
+              }
+            }
+
+            # byte_match `://` CONTAINS on all headers
+            statement {
+              byte_match_statement {
+                positional_constraint = "CONTAINS"
+                search_string         = "://"
+
+                field_to_match {
+                  headers {
+                    match_pattern {
+                      all {}
+                    }
+                    match_scope       = "ALL"
+                    oversize_handling = "NO_MATCH"
+                  }
+                }
+
+                text_transformation {
+                  priority = 0
+                  type     = "URL_DECODE"
+                }
+                text_transformation {
+                  priority = 1
+                  type     = "HTML_ENTITY_DECODE"
+                }
+                text_transformation {
+                  priority = 2
+                  type     = "HEX_DECODE"
+                }
+                text_transformation {
+                  priority = 3
+                  type     = "BASE64_DECODE"
+                }
+                text_transformation {
+                  priority = 4
+                  type     = "UTF8_TO_UNICODE"
+                }
+              }
+            }
+
+            # byte_match `://` CONTAINS on cookies
+            statement {
+              byte_match_statement {
+                positional_constraint = "CONTAINS"
+                search_string         = "://"
+
+                field_to_match {
+                  cookies {
+                    match_pattern {
+                      all {}
+                    }
+                    match_scope       = "ALL"
+                    oversize_handling = "NO_MATCH"
+                  }
                 }
 
                 text_transformation {
