@@ -283,3 +283,65 @@
   - A. Known-signature regex: match the base64 prefixes of common attack starts. e.g. PHNjcmlwdD (<script), JyBPUiAn (' OR '), PD9waHA (<?php). Low FP but easy for attackers to vary by adding leading whitespace.
   - B. Decode-then-inspect via Lambda@Edge: more powerful but adds latency and another moving part.
   - C. Accept the residual risk (2 tests, both XSS/SQLi cousins) and rely on managed rules to catch the decoded payload server-side.
+
+Then each rule shrinks from "lots of byte_match per (string × placement × transformation)" to "one regex_pattern_set_reference_statement per placement, with all 5 transformations chained":
+
+  Before (~70 byte_match blocks for php rule)
+
+  statement { byte_match_statement { search_string = "php" field=uri_path transform=URL_DECODE } }
+  statement { byte_match_statement { search_string = "php" field=uri_path transform=UTF8_TO_UNICODE } }
+  statement { byte_match_statement { search_string = "php" field=uri_path transform=HEX_DECODE } }
+  ... × 70+ permutations ...
+
+  After (5 regex_pattern_set_reference_statements per rule)
+
+  statement {
+    regex_pattern_set_reference_statement {
+      arn = aws_wafv2_regex_pattern_set.owasp_php_signatures.arn
+      field_to_match { uri_path {} }
+      text_transformation { priority = 0  type = "URL_DECODE" }
+      text_transformation { priority = 1  type = "HTML_ENTITY_DECODE" }
+      text_transformation { priority = 2  type = "HEX_DECODE" }
+      text_transformation { priority = 3  type = "BASE64_DECODE" }
+      text_transformation { priority = 4  type = "UTF8_TO_UNICODE" }
+    }
+  }
+  # ... same statement repeated 4 more times with body, query_string, cookies, headers ...
+
+┌─────────────┬─────────────────────────────────────────────────────────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────┬────────────────┐
+  │    Rule     │                                       Before                                        │                                           After                                           │     Saving     │
+  ├─────────────┼─────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼────────────────┤
+  │ 3 (PHP)     │ ~110 byte_match_statement blocks (every string × every placement × every transform) │ 7 regex_pattern_set_reference_statement + 1 trailing byte_match for /                     │ biggest        │
+  ├─────────────┼─────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼────────────────┤
+  │ 4 (RFI/LFI) │ ~40 byte_match in Group 1 + dynamic mauth/https checks                              │ 3 regex_pattern_set_reference_statement in Group 1 + 2 in not_statement + 2 dynamic mauth │ second-biggest │
+  ├─────────────┼─────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼────────────────┤
+  │ 6 (SQLi)    │ 8 sqli_match_statement (4 placements × 2 transforms)                                │ 4 sqli_match_statement, chained transforms per placement                                  │ smaller        │
+  ├─────────────┼─────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼────────────────┤
+  │ 7 (XSS)     │ 25 xss_match_statement (5 placements × 5 transforms)                                │ 5 xss_match_statement, all 5 transforms chained per placement                             │ medium         │
+  ├─────────────┼─────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼────────────────┤
+  │ 0, 1, 2, 5  │ unchanged                                                                           │ unchanged                                                                                 │ —              │
+  └─────────────┴─────────────────────────────────────────────────────────────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────┴────────────────┘
+
+ ┌───────────────────────────────────────┬──────────────────────────────────┬───────────────────────┬─────────────────────────────────────────────────────────────┐
+  │                 Rule                  │ Before (approx, from your paste) │ After (exact, grep'd) │                            Delta                            │
+  ├───────────────────────────────────────┼──────────────────────────────────┼───────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ Module + IP sets + rule-group header  │ ~1–45                            │ 1–168                 │ grew because of 5 new aws_wafv2_regex_pattern_set resources │
+  ├───────────────────────────────────────┼──────────────────────────────────┼───────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ Rule 0 owasp-detect-admin-access      │ ~46–105                          │ 169–225               │ unchanged                                                   │
+  ├───────────────────────────────────────┼──────────────────────────────────┼───────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ Rule 1 owasp-detect-bad-auth-tokens   │ ~106–165                         │ 226–292               │ unchanged                                                   │
+  ├───────────────────────────────────────┼──────────────────────────────────┼───────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ Rule 2 owasp-detect-blacklisted-ips   │ ~166–200                         │ 293–338               │ unchanged                                                   │
+  ├───────────────────────────────────────┼──────────────────────────────────┼───────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ Rule 3 owasp-detect-php-insecure      │ ~201–1230 (~1030 lines)          │ 339–673 (335 lines)   │ ✂️  ~700 lines removed                                       │
+  ├───────────────────────────────────────┼──────────────────────────────────┼───────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ Rule 4 owasp-detect-rfi-lfi-traversal │ ~1231–1755 (~525 lines)          │ 674–903 (230 lines)   │ ✂️  ~295 lines removed                                       │
+  ├───────────────────────────────────────┼──────────────────────────────────┼───────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ Rule 5 owasp-detect-ssi               │ ~1756–1870                       │ 904–1063              │ unchanged                                                   │
+  ├───────────────────────────────────────┼──────────────────────────────────┼───────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ Rule 6 owasp-mitigate-sqli            │ ~1871–1995 (~125 lines)          │ 1064–1165 (102 lines) │ ✂️  ~23 lines (4 fewer statements, chained transforms)       │
+  ├───────────────────────────────────────┼──────────────────────────────────┼───────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ Rule 7 owasp-mitigate-xss             │ ~1996–2345 (~350 lines)          │ 1166–1346 (180 lines) │ ✂️  ~170 lines (20 fewer statements)                         │
+  ├───────────────────────────────────────┼──────────────────────────────────┼───────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ TOTAL                                 │ ~2345 lines (estimate)           │ 1346 lines (exact)    │ ~1000 lines removed                                         │
+  └───────────────────────────────────────┴──────────────────────────────────┴───────────────────────┴─────────────────────────────────────────────────────────────┘
