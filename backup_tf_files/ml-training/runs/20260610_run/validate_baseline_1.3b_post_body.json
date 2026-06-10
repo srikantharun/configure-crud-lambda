@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-06-10T16:41:04.408798Z",
+  "timestamp": "2026-06-10T17:32:30.104569Z",
   "source_report": "/root/test-run-20260610/waf_rg_hsbc_custom_v3_post_body.json",
   "cf_log_group": "aws-waf-logs-baseline13",
   "alb_log_group": "aws-waf-logs-wpb-jenkins",
   "summary": {
     "total_validated": 344,
-    "cf_block": 269,
+    "cf_block": 286,
     "cf_allow_alb_block": 5,
     "cf_allow_alb_allow": 0,
-    "no_cf_log": 18,
+    "no_cf_log": 0,
     "no_alb_log": 0,
     "discrepancy": 0,
     "errors": 0
@@ -20,11 +20,17 @@
       "request_id": "waf-test-8616f260-dc8b-4526-8b13-fdb1ec403546",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.111"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -37,11 +43,17 @@
       "request_id": "waf-test-6647d0b3-d544-4845-ab21-2b7853e5c7af",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.125"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -54,11 +66,17 @@
       "request_id": "waf-test-74e34bab-190f-4a46-a5f3-95931ec96819",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.143"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -71,11 +89,17 @@
       "request_id": "waf-test-b7c6092f-f959-4b7c-a520-5d5dbd3f654c",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.156"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -88,11 +112,17 @@
       "request_id": "waf-test-c764c160-3f6a-4dd3-b28c-c5dc6faa130b",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.169"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -105,11 +135,17 @@
       "request_id": "waf-test-b8aa6da8-ca07-4db3-af56-068496d13ef8",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.186"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -191,11 +227,17 @@
       "request_id": "waf-test-ab9e19f4-6537-4859-bbb4-67570411f87f",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.216"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -277,15 +319,27 @@
       "request_id": "waf-test-dd7112b2-284b-417d-a42c-f6fe4c391dfd",
       "http_status": 503,
       "pytest_status": "fail",
-      "verdict": "NO_CF_LOG",
-      "evidence": "No CloudFront WAF log found for this request.",
+      "verdict": "CF_ALLOW_ALB_ALLOW",
+      "evidence": "Both WAFs allowed this request. HTTP status: 503.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "ALLOW",
+        "terminating_rule_id": "Default_Action",
+        "terminating_rule_type": "REGULAR",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.293"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
-        "found": false
+        "found": true,
+        "action": "ALLOW",
+        "terminating_rule_id": "Default_Action",
+        "terminating_rule_type": "REGULAR",
+        "webacl_id": "arn:aws:wafv2:eu-west-1:976629938830:regional/webacl/FMManagedWebACLV2-default_waf_eu-west-1_version_001_block-1774524282099/9b300f94-9ca3-4597-8c18-55d1f6e89e4b",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.311"
       }
     },
     {
@@ -294,11 +348,17 @@
       "request_id": "waf-test-c6c59e8d-ef9d-4f25-bdb1-d1f3b24a8541",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.359"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -311,11 +371,17 @@
       "request_id": "waf-test-d44abb35-0f64-4200-a427-16a105cd9bcb",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.372"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -328,11 +394,17 @@
       "request_id": "waf-test-54e581ab-1b42-41b1-b008-8ceff2a94785",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.626"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -368,11 +440,17 @@
       "request_id": "waf-test-ce88de8f-79f1-4438-9c8d-df0b1f296518",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.654"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -408,11 +486,17 @@
       "request_id": "waf-test-fb2d041e-8b87-4a3e-802c-42bbef4c632e",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.672"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -425,11 +509,17 @@
       "request_id": "waf-test-189d92ce-5a27-46f8-ae78-20b857569c39",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.677"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -511,11 +601,17 @@
       "request_id": "waf-test-889d8cae-b74d-4306-9e6e-cc47a61e8f43",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.726"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -574,11 +670,17 @@
       "request_id": "waf-test-43d06972-ba87-4e6b-af01-0ab4f1bb3cd9",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.752"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -816,11 +918,17 @@
       "request_id": "waf-test-329db7a5-df46-407e-9a2d-29bb2df469aa",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.934"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
@@ -833,11 +941,17 @@
       "request_id": "waf-test-65be4333-43dd-403c-9230-b2a50dd20877",
       "http_status": 403,
       "pytest_status": "pass",
-      "verdict": "NO_CF_LOG",
-      "evidence": "HTTP 403 received but no CloudFront WAF log found. The 403 may have come from CloudFront itself (not WAF). ALB WAF: no log.",
+      "verdict": "CF_BLOCK",
+      "evidence": "CONFIRMED: CloudFront WAF blocked this request. Rule: PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000. Request never reached ALB.",
       "cf_waf_log": {
         "source": "CloudFront WAF",
-        "found": false
+        "found": true,
+        "action": "BLOCK",
+        "terminating_rule_id": "PREFMManaged-AWSManagedRulesCommonRuleSet-1781097758000",
+        "terminating_rule_type": "MANAGED_RULE_GROUP",
+        "webacl_id": "arn:aws:wafv2:us-east-1:976629938830:global/webacl/FMManagedWebACLV2-baseline_1_3_block_v1-1776262662672/7793c144-95fc-438f-a85b-f432617b375a",
+        "response_code_sent": "",
+        "timestamp": "2026-06-10 16:23:11.947"
       },
       "alb_waf_log": {
         "source": "ALB WAF",
