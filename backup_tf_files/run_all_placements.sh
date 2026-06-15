@@ -68,7 +68,7 @@ echo "Evidence (raw CW) goes to: $EVIDENCE_OUT"
 banner "1/6  GET  placement=query"
 
 cd "$TF_DIR"
-make test-clean
+make test-clean </dev/null
 cp "$GET_YAML" "$TARGET_YAML"
 
 export WAF_TEST_GET_PLACEMENT=" "
@@ -77,14 +77,14 @@ export WAF_TEST_REQUIREMENTS_FILENAME=" "
 export WAF_TEST_GET_PLACEMENT=query
 export WAF_TEST_REQUIREMENTS_FILENAME=waf_requirements.yaml
 
-make test-json MODULE=$MODULE METHOD=get WAF_ENDPOINT=$ENDPOINT WAF_LOG_GROUP=$WAF_LOG_GROUP AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID > "$LOG_DIR/test_get_qs.log" 2>&1
+make test-json MODULE=$MODULE METHOD=get WAF_ENDPOINT=$ENDPOINT WAF_LOG_GROUP=$WAF_LOG_GROUP AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID </dev/null > "$LOG_DIR/test_get_qs.log" 2>&1
 mv "$TF_DIR/reports/${MODULE}.json" "$TEST_RUN_DIR/${MODULE}_get_qs.json"
 
 cd "$ML_DIR"
-make validate REPORT="$TEST_RUN_DIR/${MODULE}_get_qs.json"
+make validate REPORT="$TEST_RUN_DIR/${MODULE}_get_qs.json" OUTPUT_NAME="validate-get_qs.json" </dev/null
 sleep 60
 
-cp "$ML_DIR/output/"validate*.log "$EVIDENCE_IN/validate-get_qs.log"
+cp "$ML_DIR/output/validate-get_qs.json" "$EVIDENCE_IN/validate-get_qs.json"
 
 cd "$HOME"
 nohup python3 pull_raw_cloudwatch.py \
@@ -101,7 +101,7 @@ sleep 180
 banner "2/6  GET  placement=header"
 
 cd "$TF_DIR"
-make test-clean
+make test-clean </dev/null
 cp "$GET_YAML" "$TARGET_YAML"
 
 export WAF_TEST_GET_PLACEMENT=" "
@@ -112,14 +112,14 @@ export WAF_TEST_GET_PLACEMENT=header
 export WAF_TEST_REQUIREMENTS_FILENAME=waf_requirements.yaml
 export REQ_HEAD="X-REQUEST_INJECTION"
 
-make test-json MODULE=$MODULE METHOD=get WAF_ENDPOINT=$ENDPOINT WAF_LOG_GROUP=$WAF_LOG_GROUP AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID > "$LOG_DIR/test_get_header.log" 2>&1
+make test-json MODULE=$MODULE METHOD=get WAF_ENDPOINT=$ENDPOINT WAF_LOG_GROUP=$WAF_LOG_GROUP AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID </dev/null > "$LOG_DIR/test_get_header.log" 2>&1
 mv "$TF_DIR/reports/${MODULE}.json" "$TEST_RUN_DIR/${MODULE}_get_header.json"
 
 cd "$ML_DIR"
-make validate REPORT="$TEST_RUN_DIR/${MODULE}_get_header.json"
+make validate REPORT="$TEST_RUN_DIR/${MODULE}_get_header.json" OUTPUT_NAME="validate-get_header.json" </dev/null
 sleep 60
 
-cp "$ML_DIR/output/"validate*.log "$EVIDENCE_IN/validate-get_header.log"
+cp "$ML_DIR/output/validate-get_header.json" "$EVIDENCE_IN/validate-get_header.json"
 
 cd "$HOME"
 nohup python3 pull_raw_cloudwatch.py \
@@ -136,7 +136,7 @@ sleep 180
 banner "3/6  GET  placement=cookie"
 
 cd "$TF_DIR"
-make test-clean
+make test-clean </dev/null
 cp "$GET_YAML" "$TARGET_YAML"
 
 export WAF_TEST_GET_PLACEMENT=" "
@@ -145,14 +145,14 @@ export WAF_TEST_REQUIREMENTS_FILENAME=" "
 export WAF_TEST_GET_PLACEMENT=cookie
 export WAF_TEST_REQUIREMENTS_FILENAME=waf_requirements.yaml
 
-make test-json MODULE=$MODULE METHOD=get WAF_ENDPOINT=$ENDPOINT WAF_LOG_GROUP=$WAF_LOG_GROUP AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID > "$LOG_DIR/test_get_cookie.log" 2>&1
+make test-json MODULE=$MODULE METHOD=get WAF_ENDPOINT=$ENDPOINT WAF_LOG_GROUP=$WAF_LOG_GROUP AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID </dev/null > "$LOG_DIR/test_get_cookie.log" 2>&1
 mv "$TF_DIR/reports/${MODULE}.json" "$TEST_RUN_DIR/${MODULE}_get_cookie.json"
 
 cd "$ML_DIR"
-make validate REPORT="$TEST_RUN_DIR/${MODULE}_get_cookie.json"
+make validate REPORT="$TEST_RUN_DIR/${MODULE}_get_cookie.json" OUTPUT_NAME="validate-get_cookie.json" </dev/null
 sleep 60
 
-cp "$ML_DIR/output/"validate*.log "$EVIDENCE_IN/validate-get_cookie.log"
+cp "$ML_DIR/output/validate-get_cookie.json" "$EVIDENCE_IN/validate-get_cookie.json"
 
 cd "$HOME"
 nohup python3 pull_raw_cloudwatch.py \
@@ -169,7 +169,7 @@ sleep 180
 banner "4/6  GET  placement=uri"
 
 cd "$TF_DIR"
-make test-clean
+make test-clean </dev/null
 cp "$GET_YAML" "$TARGET_YAML"
 
 export WAF_TEST_GET_PLACEMENT=" "
@@ -178,14 +178,14 @@ export WAF_TEST_REQUIREMENTS_FILENAME=" "
 export WAF_TEST_GET_PLACEMENT=uri
 export WAF_TEST_REQUIREMENTS_FILENAME=waf_requirements.yaml
 
-make test-json MODULE=$MODULE METHOD=get WAF_ENDPOINT=$ENDPOINT WAF_LOG_GROUP=$WAF_LOG_GROUP AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID > "$LOG_DIR/test_get_uri.log" 2>&1
+make test-json MODULE=$MODULE METHOD=get WAF_ENDPOINT=$ENDPOINT WAF_LOG_GROUP=$WAF_LOG_GROUP AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID </dev/null > "$LOG_DIR/test_get_uri.log" 2>&1
 mv "$TF_DIR/reports/${MODULE}.json" "$TEST_RUN_DIR/${MODULE}_get_uri.json"
 
 cd "$ML_DIR"
-make validate REPORT="$TEST_RUN_DIR/${MODULE}_get_uri.json"
+make validate REPORT="$TEST_RUN_DIR/${MODULE}_get_uri.json" OUTPUT_NAME="validate-get_uri.json" </dev/null
 sleep 60
 
-cp "$ML_DIR/output/"validate*.log "$EVIDENCE_IN/validate-get_uri.log"
+cp "$ML_DIR/output/validate-get_uri.json" "$EVIDENCE_IN/validate-get_uri.json"
 
 cd "$HOME"
 nohup python3 pull_raw_cloudwatch.py \
@@ -202,7 +202,7 @@ sleep 180
 banner "5/6  POST  placement=query"
 
 cd "$TF_DIR"
-make test-clean
+make test-clean </dev/null
 cp "$POST_YAML" "$TARGET_YAML"
 
 export WAF_TEST_GET_PLACEMENT=" "
@@ -212,14 +212,14 @@ export WAF_TEST_REQUIREMENTS_FILENAME=" "
 export WAF_TEST_POST_PLACEMENT=query
 export WAF_TEST_REQUIREMENTS_FILENAME=waf_requirements.yaml
 
-make test-json MODULE=$MODULE METHOD=post WAF_ENDPOINT=$ENDPOINT WAF_LOG_GROUP=$WAF_LOG_GROUP AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID > "$LOG_DIR/test_post_qs.log" 2>&1
+make test-json MODULE=$MODULE METHOD=post WAF_ENDPOINT=$ENDPOINT WAF_LOG_GROUP=$WAF_LOG_GROUP AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID </dev/null > "$LOG_DIR/test_post_qs.log" 2>&1
 mv "$TF_DIR/reports/${MODULE}.json" "$TEST_RUN_DIR/${MODULE}_post_qs.json"
 
 cd "$ML_DIR"
-make validate REPORT="$TEST_RUN_DIR/${MODULE}_post_qs.json"
+make validate REPORT="$TEST_RUN_DIR/${MODULE}_post_qs.json" OUTPUT_NAME="validate-post_qs.json" </dev/null
 sleep 60
 
-cp "$ML_DIR/output/"validate*.log "$EVIDENCE_IN/validate-post_qs.log"
+cp "$ML_DIR/output/validate-post_qs.json" "$EVIDENCE_IN/validate-post_qs.json"
 
 cd "$HOME"
 nohup python3 pull_raw_cloudwatch.py \
@@ -236,7 +236,7 @@ sleep 180
 banner "6/6  POST  placement=body"
 
 cd "$TF_DIR"
-make test-clean
+make test-clean </dev/null
 cp "$POST_YAML" "$TARGET_YAML"
 
 export WAF_TEST_GET_PLACEMENT=" "
@@ -246,14 +246,14 @@ export WAF_TEST_REQUIREMENTS_FILENAME=" "
 export WAF_TEST_POST_PLACEMENT=body
 export WAF_TEST_REQUIREMENTS_FILENAME=waf_requirements.yaml
 
-make test-json MODULE=$MODULE METHOD=post WAF_ENDPOINT=$ENDPOINT WAF_LOG_GROUP=$WAF_LOG_GROUP AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID > "$LOG_DIR/test_post_body.log" 2>&1
+make test-json MODULE=$MODULE METHOD=post WAF_ENDPOINT=$ENDPOINT WAF_LOG_GROUP=$WAF_LOG_GROUP AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID </dev/null > "$LOG_DIR/test_post_body.log" 2>&1
 mv "$TF_DIR/reports/${MODULE}.json" "$TEST_RUN_DIR/${MODULE}_post_body.json"
 
 cd "$ML_DIR"
-make validate REPORT="$TEST_RUN_DIR/${MODULE}_post_body.json"
+make validate REPORT="$TEST_RUN_DIR/${MODULE}_post_body.json" OUTPUT_NAME="validate-post_body.json" </dev/null
 sleep 60
 
-cp "$ML_DIR/output/"validate*.log "$EVIDENCE_IN/validate-post_body.log"
+cp "$ML_DIR/output/validate-post_body.json" "$EVIDENCE_IN/validate-post_body.json"
 
 cd "$HOME"
 nohup python3 pull_raw_cloudwatch.py \

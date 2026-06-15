@@ -78,6 +78,7 @@ def validate_report(
     alb_region: str,
     output_dir: str,
     sample_size: int = 0,
+    output_name: str = "validation_evidence.json",
 ):
     """Validate every test result against both CF and ALB WAF logs."""
 
@@ -190,7 +191,7 @@ def validate_report(
     }
 
     Path(output_dir).mkdir(parents=True, exist_ok=True)
-    output_path = f"{output_dir}/validation_evidence.json"
+    output_path = f"{output_dir}/{output_name}"
     with open(output_path, "w") as f:
         json.dump(validation_report, f, indent=2)
 
@@ -332,6 +333,10 @@ if __name__ == "__main__":
     parser.add_argument("--alb-log-group", required=True, help="ALB WAF log group")
     parser.add_argument("--alb-region", default="eu-west-1", help="ALB WAF region")
     parser.add_argument("--output-dir", default="output", help="Output directory")
+    parser.add_argument("--output-name", default="validation_evidence.json",
+                        help="Output filename within --output-dir. Set a unique "
+                             "name per placement (e.g. validate-get_qs.json) so "
+                             "parallel runs do not overwrite each other.")
     parser.add_argument("--sample", type=int, default=0,
                         help="Validate N random passes + all failures (0=validate all)")
 
@@ -345,4 +350,5 @@ if __name__ == "__main__":
         alb_region=args.alb_region,
         output_dir=args.output_dir,
         sample_size=args.sample,
+        output_name=args.output_name,
     )

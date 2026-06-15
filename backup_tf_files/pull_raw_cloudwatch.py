@@ -56,13 +56,15 @@ LOOKBACK_HOURS = 168   # 7 days back from validate.json timestamp
 LOOKAHEAD_HOURS = 1
 
 # (run_profile, source_json)
+# Each placement now writes a unique validate-<placement>.json (see validate.py
+# --output-name / run_all_placements.sh), so every profile maps to its own file.
 SOURCES = [
-    ("post_run1",       "validate_log_baseline13.json"),
-    ("post_run2",       "validate_log_baseline13-POST.json"),
-    ("get_querystring", "validate_log_baseline13_get.json"),
-    ("get_with_cookie", "validate_evidence_get_with_cookie.json"),
-    ("get_with_url",    "validate_evidence_get_with_url.json"),
-    ("get_with_header", "validate_evidence_get_with_header.json"),
+    ("post_run1",       "validate-post_qs.json"),
+    ("post_run2",       "validate-post_body.json"),
+    ("get_querystring", "validate-get_qs.json"),
+    ("get_with_cookie", "validate-get_cookie.json"),
+    ("get_with_url",    "validate-get_uri.json"),
+    ("get_with_header", "validate-get_header.json"),
 ]
 
 # ---------------------------------------------------------------------------
