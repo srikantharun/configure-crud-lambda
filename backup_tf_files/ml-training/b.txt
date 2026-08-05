@@ -1,0 +1,4618 @@
+locals {
+  rg_capacity = 780
+}
+
+resource "aws_wafv2_rule_group" "hsbc_life_custom" {
+  name        = "${var.service_name}-custom-${local.rg_capacity}-${var.policy_ver}"
+  description = "HSBC Insurance Technology custom waf rulegroup"
+  scope       = local.scope
+  capacity    = local.rg_capacity
+
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "insurancetechnologycustomrulegroup"
+    sampled_requests_enabled   = true
+  }
+  #----------------------------------------------------------------------------
+  # GROUP A : SIZERESTRICTION_BODY RULES (owasp-restrict-sizes label)
+  # These URI's trigger Size rule only - no XSS involvement
+  #-----------------------------------------------------------------------------
+  # Rule 1: custom-10030
+  # URI : /hsbcportal/cms/wysiwyg_images/upload
+  # Match: static path - STARTS_WITH Sufficient
+  rule {
+    name     = "custom-10030"
+    priority = 1
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.size_restrictions_rule_group_name}:${var.rule_label_namespace}:SizeRestrictions_Body"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "/hsbcportal/cms/wysiwyg_images/upload"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        // Hostname check
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            # benefitsplus-choices-preprod.hsbc.com.hk
+            # healthylife-choices-preprod.hsbc.com.hk
+            # benefitsplus-auth-preprod.hsbc.com.hk
+            # benefitsplus-distribution-platform-preprod.hsbc.com.hk
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+          }
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:SizeRestrictions_Body_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10030"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  #----------------------------------------------------------------------------
+  # GROUP B : SIZERESTRICTION_BODY and CrossSiteScripting RULES (Dual Label)
+  # These URI's trigger Both Size rule and XSS Rules
+  # Two Rules per URI - One per Label
+  #-----------------------------------------------------------------------------
+  # Rule 2 & 3: custom-10031 / custom-10032
+  # URI : /hsbcportal/catalog/category_image/upload
+  rule {
+    name     = "custom-10031"
+    priority = 2
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.size_restrictions_rule_group_name}:${var.rule_label_namespace}:SizeRestrictions_Body"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "/hsbcportal/catalog/category_image/upload"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            # benefitsplus-choices-preprod.hsbc.com.hk
+            # healthylife-choices-preprod.hsbc.com.hk
+            # benefitsplus-auth-preprod.hsbc.com.hk
+            # benefitsplus-distribution-platform-preprod.hsbc.com.hk
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+          }
+
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:SizeRestrictions_Body_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10031"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "custom-10032"
+    priority = 3
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.owasp_top10_rule_group_name}:${var.rule_label_namespace}:owasp-mitigate-xss"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "/hsbcportal/catalog/category_image/upload"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            # benefitsplus-choices-preprod.hsbc.com.hk
+            # healthylife-choices-preprod.hsbc.com.hk
+            # benefitsplus-auth-preprod.hsbc.com.hk
+            # benefitsplus-distribution-platform-preprod.hsbc.com.hk
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+          }
+
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:owasp-mitigate-xss_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10032"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  # Rule 3 & 4: custom-10033 / custom-10034
+  # URI : /hsbcportal/weltowlcarousel/banner/save
+  rule {
+    name     = "custom-10033"
+    priority = 4
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.size_restrictions_rule_group_name}:${var.rule_label_namespace}:SizeRestrictions_Body"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "/hsbcportal/weltowlcarousel/banner/save"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            # benefitsplus-choices-preprod.hsbc.com.hk
+            # healthylife-choices-preprod.hsbc.com.hk
+            # benefitsplus-auth-preprod.hsbc.com.hk
+            # benefitsplus-distribution-platform-preprod.hsbc.com.hk
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+          }
+
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:SizeRestrictions_Body_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10033"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "custom-10034"
+    priority = 5
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.owasp_top10_rule_group_name}:${var.rule_label_namespace}:owasp-mitigate-xss"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "/hsbcportal/weltowlcarousel/banner/save"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            # benefitsplus-choices-preprod.hsbc.com.hk
+            # healthylife-choices-preprod.hsbc.com.hk
+            # benefitsplus-auth-preprod.hsbc.com.hk
+            # benefitsplus-distribution-platform-preprod.hsbc.com.hk
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+          }
+
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:owasp-mitigate-xss_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10034"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  # Rule 5 & 6: custom-10035 / custom-10036
+  # URI : /hsbcportal/csmarketplace/vendor/save
+  rule {
+    name     = "custom-10035"
+    priority = 6
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.size_restrictions_rule_group_name}:${var.rule_label_namespace}:SizeRestrictions_Body"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "/hsbcportal/csmarketplace/vendor/save"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            # benefitsplus-choices-preprod.hsbc.com.hk
+            # healthylife-choices-preprod.hsbc.com.hk
+            # benefitsplus-auth-preprod.hsbc.com.hk
+            # benefitsplus-distribution-platform-preprod.hsbc.com.hk
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+          }
+
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:SizeRestrictions_Body_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10035"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "custom-10036"
+    priority = 7
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.owasp_top10_rule_group_name}:${var.rule_label_namespace}:owasp-mitigate-xss"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "/hsbcportal/csmarketplace/vendor/save"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            # benefitsplus-choices-preprod.hsbc.com.hk
+            # healthylife-choices-preprod.hsbc.com.hk
+            # benefitsplus-auth-preprod.hsbc.com.hk
+            # benefitsplus-distribution-platform-preprod.hsbc.com.hk
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+          }
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:owasp-mitigate-xss_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10036"
+      sampled_requests_enabled   = true
+    }
+  }
+# Rule 7 & 8: custom-10037 / custom-10038
+  # URI : /claim-service/api/v1/clients/hase/users/.../claim/documents
+  #       /claim/api/v1/clients/hase/users/../claim/documents/...
+
+  rule {
+    name     = "custom-10037"
+    priority = 8
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.size_restrictions_rule_group_name}:${var.rule_label_namespace}:SizeRestrictions_Body"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        statement {
+          or_statement {
+            statement {
+              byte_match_statement {
+                search_string = "/claim-service/api/v1/clients"
+                field_to_match {
+                  uri_path {}
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "URL_DECODE"
+                }
+                positional_constraint = "STARTS_WITH"
+              }
+            }
+            statement {
+              byte_match_statement {
+                search_string = "/claim/api/v1/clients"
+                field_to_match {
+                  uri_path {}
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "URL_DECODE"
+                }
+                positional_constraint = "STARTS_WITH"
+              }
+            }
+          }
+        }
+        statement {
+          byte_match_statement {
+            search_string = "/users/"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "CONTAINS"
+          }
+        }
+        statement {
+          byte_match_statement {
+            search_string = "/claim/documents/"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "CONTAINS"
+          }
+        }
+
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            # benefitsplus-choices-preprod.hsbc.com.hk
+            # healthylife-choices-preprod.hsbc.com.hk
+            # benefitsplus-auth-preprod.hsbc.com.hk
+            # benefitsplus-distribution-platform-preprod.hsbc.com.hk
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+          }
+
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:SizeRestrictions_Body_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10037"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "custom-10038"
+    priority = 9
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.owasp_top10_rule_group_name}:${var.rule_label_namespace}:owasp-mitigate-xss"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        statement {
+          or_statement {
+            statement {
+              byte_match_statement {
+                search_string = "/claim-service/api/v1/clients"
+                field_to_match {
+                  uri_path {}
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "URL_DECODE"
+                }
+                positional_constraint = "STARTS_WITH"
+              }
+            }
+            statement {
+              byte_match_statement {
+                search_string = "/claim/api/v1/clients"
+                field_to_match {
+                  uri_path {}
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "URL_DECODE"
+                }
+                positional_constraint = "STARTS_WITH"
+              }
+            }
+          }
+        }
+        statement {
+          byte_match_statement {
+            search_string = "/users/"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "CONTAINS"
+          }
+        }
+        statement {
+          byte_match_statement {
+            search_string = "/claim/documents/"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "CONTAINS"
+          }
+        }
+
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            # benefitsplus-choices-preprod.hsbc.com.hk
+            # healthylife-choices-preprod.hsbc.com.hk
+            # benefitsplus-auth-preprod.hsbc.com.hk
+            # benefitsplus-distribution-platform-preprod.hsbc.com.hk
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+          }
+
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:owasp-mitigate-xss_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10038"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  # Rule 9 & 10: custom-10039 / custom-10040
+  # URI : /prescription/api/clients/{client}/users/{userId}/patientId/{patientId}/uploaddocument
+
+  rule {
+    name     = "custom-10039"
+    priority = 10
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.size_restrictions_rule_group_name}:${var.rule_label_namespace}:SizeRestrictions_Body"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "/prescription/api/clients"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+        statement {
+          byte_match_statement {
+            search_string = "/users/"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "CONTAINS"
+          }
+        }
+        statement {
+          byte_match_statement {
+            search_string = "patientId"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "CONTAINS"
+          }
+        }
+
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            # benefitsplus-choices-preprod.hsbc.com.hk
+            # healthylife-choices-preprod.hsbc.com.hk
+            # benefitsplus-auth-preprod.hsbc.com.hk
+            # benefitsplus-distribution-platform-preprod.hsbc.com.hk
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+          }
+
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:SizeRestrictions_Body_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10039"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "custom-10040"
+    priority = 11
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.owasp_top10_rule_group_name}:${var.rule_label_namespace}:owasp-mitigate-xss"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "/prescription/api/clients"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+        statement {
+          byte_match_statement {
+            search_string = "/users/"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "CONTAINS"
+          }
+        }
+        statement {
+          byte_match_statement {
+            search_string = "patientId"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "CONTAINS"
+          }
+        }
+
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            # benefitsplus-choices-preprod.hsbc.com.hk
+            # healthylife-choices-preprod.hsbc.com.hk
+            # benefitsplus-auth-preprod.hsbc.com.hk
+            # benefitsplus-distribution-platform-preprod.hsbc.com.hk
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+          }
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:owasp-mitigate-xss_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10040"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  # Rule 11 & 12: custom-10041 / custom-10042
+  # URI : /hsbcportal/catalog/product_gallery/upload
+
+  rule {
+    name     = "custom-10041"
+    priority = 12
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.size_restrictions_rule_group_name}:${var.rule_label_namespace}:SizeRestrictions_Body"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "/hsbcportal/catalog/product_gallery/upload"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            # benefitsplus-choices-preprod.hsbc.com.hk
+            # healthylife-choices-preprod.hsbc.com.hk
+            # benefitsplus-auth-preprod.hsbc.com.hk
+            # benefitsplus-distribution-platform-preprod.hsbc.com.hk
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+          }
+
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:SizeRestrictions_Body_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10041"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "custom-10042"
+    priority = 13
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.owasp_top10_rule_group_name}:${var.rule_label_namespace}:owasp-mitigate-xss"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "/hsbcportal/catalog/product_gallery/upload"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            # benefitsplus-choices-preprod.hsbc.com.hk
+            # healthylife-choices-preprod.hsbc.com.hk
+            # benefitsplus-auth-preprod.hsbc.com.hk
+            # benefitsplus-distribution-platform-preprod.hsbc.com.hk
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+          }
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:owasp-mitigate-xss_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10042"
+      sampled_requests_enabled   = true
+    }
+  }
+
+
+  
+  # 
+  # v3 / Rule 21 custom-10043
+  # URI : /csproduct/product_gallery/upload
+
+  rule {
+    name     = "custom-10043"
+    priority = 21
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.size_restrictions_rule_group_name}:${var.rule_label_namespace}:SizeRestrictions_Body"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "post"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "EXACTLY"
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "multipart/form-data"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)\\.jpe?g"
+            field_to_match {
+              body {
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "/csproduct/product_gallery/upload"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          or_statement {
+            # POC host
+            statement {
+              byte_match_statement {
+                search_string = "dlpaasrngb6ue.cloudfront.net"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # PreProd host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # Prod host
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-auth.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choice.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "cliniclist.insurance.hsbc.com.sg"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            # New hosts v3
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "healthylife-choices-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-auth-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+
+            statement {
+              byte_match_statement {
+                search_string = "benefitsplus-distribution-platform-preprod.hsbc.com.hk"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+                positional_constraint = "EXACTLY"
+              }
+            }
+          }
+        }
+
+        # Condition 5 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+
+            field_to_match {
+              body {
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:SizeRestrictions_Body_FalsePositive"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10043"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  #====================================================================
+  #======Catch Rules - after all Whitelist Rules=======================
+  #====================================================================
+
+  # Priotory 100 - Block: SizeRestrictionsCatch_Body
+  rule {
+    name     = "SizeRestrictionsCatch_Body"
+    priority = 100
+
+    action {
+      block {}
+    }
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.size_restrictions_rule_group_name}:${var.rule_label_namespace}:SizeRestrictions_Body"
+          }
+        }
+        statement {
+          not_statement {
+            statement {
+              label_match_statement {
+                scope = "LABEL"
+                key   = "${var.rule_label_namespace}:SizeRestrictions_Body_FalsePositive"
+              }
+            }
+          }
+        }
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "SizerestrictionsCatchBody"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  # Priotory 110 - Block: CrossSiteScriptingCatch_Body
+  rule {
+    name     = "CrossSiteScriptingCatch_Body"
+    priority = 110
+
+    action {
+      block {}
+    }
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:${local.account_id}:rulegroup:${var.owasp_top10_rule_group_name}:${var.rule_label_namespace}:owasp-mitigate-xss"
+          }
+        }
+        statement {
+          not_statement {
+            statement {
+              label_match_statement {
+                scope = "LABEL"
+                key   = "${var.rule_label_namespace}:owasp-mitigate-xss_FalsePositive"
+              }
+            }
+          }
+        }
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "CrossSiteScriptingCatchBody"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+}
