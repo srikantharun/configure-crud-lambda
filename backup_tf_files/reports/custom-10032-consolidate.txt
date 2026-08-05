@@ -1,0 +1,449 @@
+###############################################################################
+# custom-10032-consolidate
+#
+# Consolidation of the HSBC Life Benefits v3 custom rule group.
+#
+# Replaces custom-10030 .. custom-10043 (15 count rules, capacity 780) with
+# 4 count rules + the 2 unchanged catch rules.
+#
+# Design: every condition that was identical across all 15 rules (method,
+# content-type, host allow-list, file-type, body size) is evaluated ONCE in a
+# prequalify rule that emits a label. The per-URI rules then match on that
+# label instead of re-evaluating the shared conditions.
+#
+# Behaviour is intended to be identical to b.txt. The threat-label AND is
+# preserved on every FP rule, so CloudWatch counts keep the same meaning as
+# the rules they replace (important for the FP evidence pack).
+#
+# ALWAYS confirm the real number before apply:
+#   aws wafv2 check-capacity --scope CLOUDFRONT --region us-east-1 \
+#     --rules file://rules.json
+###############################################################################
+
+locals {
+  rg_capacity = 100 # est. ~43 WCU in use; headroom for future URIs
+
+  # --- Label keys -----------------------------------------------------------
+  lbl_size_threat = "awswaf:${local.account_id}:rulegroup:${var.size_restrictions_rule_group_name}:${var.rule_label_namespace}:SizeRestrictions_Body"
+  lbl_xss_threat  = "awswaf:${local.account_id}:rulegroup:${var.owasp_top10_rule_group_name}:${var.rule_label_namespace}:owasp-mitigate-xss"
+
+  lbl_size_fp = "${var.rule_label_namespace}:SizeRestrictions_Body_FalsePositive"
+  lbl_xss_fp  = "${var.rule_label_namespace}:owasp-mitigate-xss_FalsePositive"
+
+  # Emitted by the prequalify rule, consumed by the FP rules below.
+  lbl_prequalified_short = "upload-request-prequalified"
+  lbl_prequalified       = "awswaf:${local.account_id}:rulegroup:custom-10032-consolidate:${var.rule_label_namespace}:upload-request-prequalified"
+
+  # --- Shared match expressions --------------------------------------------
+  # 12 permitted hostnames, was an or_statement of 12 byte_match (12 WCU per
+  # rule); now one regex (3 WCU, evaluated once for the whole group).
+  host_regex = "^(?i:dlpaasrngb6ue\\.cloudfront\\.net|benefitsplus(?:-preprod|-distribution-platform(?:-preprod)?|-choices-preprod|-auth-preprod)\\.hsbc\\.com\\.hk|healthylife(?:-choices(?:-preprod)?|-auth|-choice)?\\.hsbc\\.com\\.hk|cliniclist\\.insurance\\.hsbc\\.com\\.sg)$"
+
+  # Unchanged from b.txt.
+  filetype_regex = "(?i)(?:\\.GIF|\\.jpg|\\.jpeg|\\.heic|\\.png|\\.pdf)"
+
+  # URIs whose SizeRestrictions_Body findings are accepted as false positive.
+  # custom-10030, 10031, 10033, 10035, 10037, 10039, 10041.
+  # /csproduct/product_gallery/upload is NOT here - it keeps its narrower
+  # jpeg-only file-type condition and is handled by custom-10053.
+  uri_regex_size = "^(?:/hsbcportal/(?:cms/wysiwyg_images/upload|catalog/(?:category_image|product_gallery)/upload|weltowlcarousel/banner/save|csmarketplace/vendor/save)|/claim(?:-service)?/api/v1/clients/[^/]+/users/[^/]+/claim/documents/|/prescription/api/clients/[^/]+/users/[^/]+/patientId/[^/]+)"
+
+  # URIs whose owasp-mitigate-xss findings are accepted as false positive.
+  # custom-10032, 10034, 10036, 10038, 10040, 10042.
+  # Same set MINUS /hsbcportal/cms/wysiwyg_images/upload, which was size-only.
+  uri_regex_xss = "^(?:/hsbcportal/(?:catalog/(?:category_image|product_gallery)/upload|weltowlcarousel/banner/save|csmarketplace/vendor/save)|/claim(?:-service)?/api/v1/clients/[^/]+/users/[^/]+/claim/documents/|/prescription/api/clients/[^/]+/users/[^/]+/patientId/[^/]+)"
+}
+
+resource "aws_wafv2_rule_group" "hsbc_life_custom_consolidated" {
+  name        = "custom-10032-consolidate"
+  description = "HSBC Insurance Technology custom waf rulegroup - consolidated"
+  scope       = local.scope
+  capacity    = local.rg_capacity
+
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "insurancetechnologycustomrulegroup"
+    sampled_requests_enabled   = true
+  }
+
+  #===========================================================================
+  # STAGE 1 - PREQUALIFY
+  # All conditions that were repeated verbatim in every rule of b.txt.
+  # Evaluated once; result carried forward as a label.
+  #
+  # Regex with (?i) is used instead of byte_match + LOWERCASE for method,
+  # content-type and host. Same semantics, and it avoids three separate
+  # 10-WCU text transformations.
+  #===========================================================================
+  rule {
+    name     = "custom-10050"
+    priority = 1
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+
+        # Condition 1 - HTTP method is POST
+        statement {
+          regex_match_statement {
+            regex_string = "^(?i:post)$"
+            field_to_match {
+              method {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        # Condition 2 - Content-Type starts with multipart/form-data
+        statement {
+          regex_match_statement {
+            regex_string = "^(?i:multipart/form-data)"
+            field_to_match {
+              single_header {
+                name = "content-type"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        # Condition 3 - Host is one of the 12 permitted hostnames
+        statement {
+          regex_match_statement {
+            regex_string = local.host_regex
+            field_to_match {
+              single_header {
+                name = "host"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        # Condition 4 - Body size is less than 5MB
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 5242880
+            field_to_match {
+              body {
+                oversize_handling = "CONTINUE"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        # Condition 5 - Permitted upload file type present in body
+        statement {
+          regex_match_statement {
+            regex_string = local.filetype_regex
+            field_to_match {
+              body {
+                oversize_handling = "CONTINUE"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = "${var.rule_label_namespace}:${local.lbl_prequalified_short}"
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10050prequalify"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  #===========================================================================
+  # STAGE 2 - FALSE POSITIVE LABELLING
+  # Only the label being exempted and the URI set differ between these rules.
+  #===========================================================================
+
+  # ---------------------------------------------------------------------
+  # custom-10051 - SizeRestrictions_Body false positive
+  # Replaces: custom-10030, 10031, 10033, 10035, 10037, 10039, 10041
+  # ---------------------------------------------------------------------
+  rule {
+    name     = "custom-10051"
+    priority = 2
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = local.lbl_size_threat
+          }
+        }
+
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = local.lbl_prequalified
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = local.uri_regex_size
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = local.lbl_size_fp
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10051sizefp"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  # ---------------------------------------------------------------------
+  # custom-10052 - owasp-mitigate-xss false positive
+  # Replaces: custom-10032, 10034, 10036, 10038, 10040, 10042
+  # ---------------------------------------------------------------------
+  rule {
+    name     = "custom-10052"
+    priority = 3
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = local.lbl_xss_threat
+          }
+        }
+
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = local.lbl_prequalified
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = local.uri_regex_xss
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = local.lbl_xss_fp
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10052xssfp"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  # ---------------------------------------------------------------------
+  # custom-10053 - SizeRestrictions_Body false positive, jpeg only
+  # Replaces: custom-10043
+  # Kept separate because this URI accepts a narrower file-type set than
+  # every other URI. Folding it into custom-10051 would silently widen the
+  # exemption from jpeg to all six types.
+  # ---------------------------------------------------------------------
+  rule {
+    name     = "custom-10053"
+    priority = 4
+
+    action {
+      count {}
+    }
+
+    statement {
+      and_statement {
+
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = local.lbl_size_threat
+          }
+        }
+
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = local.lbl_prequalified
+          }
+        }
+
+        statement {
+          byte_match_statement {
+            search_string = "/csproduct/product_gallery/upload"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+            positional_constraint = "STARTS_WITH"
+          }
+        }
+
+        statement {
+          regex_match_statement {
+            regex_string = "(?i)\\.jpe?g"
+            field_to_match {
+              body {
+                oversize_handling = "CONTINUE"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+
+    rule_label {
+      name = local.lbl_size_fp
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "custom10053csproductsizefp"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  #===========================================================================
+  # STAGE 3 - CATCH RULES (unchanged from b.txt)
+  #===========================================================================
+
+  rule {
+    name     = "SizeRestrictionsCatch_Body"
+    priority = 100
+
+    action {
+      block {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = local.lbl_size_threat
+          }
+        }
+        statement {
+          not_statement {
+            statement {
+              label_match_statement {
+                scope = "LABEL"
+                key   = local.lbl_size_fp
+              }
+            }
+          }
+        }
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "SizerestrictionsCatchBody"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "CrossSiteScriptingCatch_Body"
+    priority = 110
+
+    action {
+      block {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = local.lbl_xss_threat
+          }
+        }
+        statement {
+          not_statement {
+            statement {
+              label_match_statement {
+                scope = "LABEL"
+                key   = local.lbl_xss_fp
+              }
+            }
+          }
+        }
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "CrossSiteScriptingCatchBody"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
