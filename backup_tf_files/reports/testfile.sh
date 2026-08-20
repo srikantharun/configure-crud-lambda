@@ -1,3 +1,16 @@
+$appId = "9c41a1d2-71ad-39d8-b32a-589aab03bfbc"
+$jql   = 'updated >= -6w AND assignee in ("7903162")'
+$path  = [uri]::EscapeDataString("/rest/api/2/search?jql=$jql&maxResults=50&fields=key,summary,status,created,priority")
+
+$r = irm "$conf/plugins/servlet/applinks/proxy?appId=$appId&path=$path" -UseDefaultCredentials
+
+$r.issues | Select `
+    @{n='Key';e={$_.key}},
+    @{n='Summary';e={$_.fields.summary}},
+    @{n='Status';e={$_.fields.status.name}},
+    @{n='Created';e={([datetime]$_.fields.created).ToString('yyyy-MM-dd HH:mm')}} |
+  Sort Created -Descending | Format-Table -Auto
+  
  USER_AGENT="dlpaasrngb6ue.cloudfront.net"
   HOST="https://dlpaasrngb6ue.cloudfront.net"
 
