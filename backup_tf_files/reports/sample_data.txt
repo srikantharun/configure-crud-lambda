@@ -1,0 +1,90 @@
+Master table
+#	Ticket	Summary	Parent	Theme
+1	ITTT-3019	Check ELK NonProd cluster for lags after Trellix OAS enabled	—	Trellix OAS
+2	ITTT-3016	Index ILM policies checks – Prod	ITTT-1733	v8Ph2 Prod
+3	ITTT-3015	Saved searches / views migration checks – Prod	ITTT-1733	v8Ph2 Prod
+4	ITTT-3014	Watchers migration checks – Prod	ITTT-1733	v8Ph2 Prod
+5	ITTT-3012	Infra checks Kafka nodes – Prod	ITTT-1733	v8Ph2 Prod
+6	ITTT-3011	Point log-gens to v8 Prod cluster	ITTT-1733	v8Ph2 Prod
+7	ITTT-3010	Point log-gens to R9 cluster – Prod	ITTT-1733	v8Ph2 Prod
+8	ITTT-3008	ELK – No logs ingested into Prod	—	Incident
+9	ITTT-3000	Hourly & daily backup snapshots – PreProd	ITTT-1727	v8Ph2 PreProd
+10	ITTT-2999	AppD integration checks – PreProd	ITTT-1727	v8Ph2 PreProd
+11	ITTT-2998	Index ILM policies check – PreProd	ITTT-1727	v8Ph2 PreProd
+12	ITTT-2997	Watchers migration checks – PreProd	ITTT-1727	v8Ph2 PreProd
+13	ITTT-2996	Users migration checks – PreProd	ITTT-1727	v8Ph2 PreProd
+14	ITTT-2995	Infra checks Kafka nodes – PreProd	ITTT-1727	v8Ph2 PreProd
+15	ITTT-2986	HAT TC8 – Fail all nodes in a single AZ	ITTT-2977	RHEL9.6 HA
+16	ITTT-2985	HAT TC7 – Fail single Kibana node	ITTT-2977	RHEL9.6 HA
+17	ITTT-2984	HAT TC6 – Fail single ES Data node	ITTT-2977	RHEL9.6 HA
+18	ITTT-2983	HAT TC5 – Fail single Filebeat Consumer node	ITTT-2977	RHEL9.6 HA
+19	ITTT-2982	HAT TC4 – Fail single ES Ingest node	ITTT-2977	RHEL9.6 HA
+20	ITTT-2981	HAT TC3 – Fail single ES Master node	ITTT-2977	RHEL9.6 HA
+21	ITTT-2980	HAT TC2 – Fail single Kafka Controller node	ITTT-2977	RHEL9.6 HA
+22	ITTT-2979	HAT TC1 – Fail single Kafka Broker node	ITTT-2977	RHEL9.6 HA
+23	ITTT-2978	MAT – Pre-checks	ITTT-2977	RHEL9.6 HA
+24	ITTT-2957	Auditbeat testing in CDDM prod	—	Auditbeat
+25	ITTT-2956	Auditbeat testing in CDDM preprod	—	Auditbeat
+26	ITTT-2949	Trellix Performance test results – run 3	ITTT-2900	Trellix perf
+27	ITTT-2948	Trellix Performance test results – run 2	ITTT-2900	Trellix perf
+28	ITTT-2947	Trellix Performance test results – run 1	ITTT-2900	Trellix perf
+29	ITTT-2943	Perf Test results (RHEL9.6) – run 5	ITTT-2908	RHEL9.6 perf
+30	ITTT-2937	Perf Test results (RHEL9.6) – run 4	ITTT-2908	RHEL9.6 perf
+31	ITTT-2935	ELK-NonProd DIT-IAT – Investigate delays in log ingestion	—	Investigation
+32	ITTT-2931	ELK old Kafka (v2) traffic check	—	Investigation
+33	ITTT-2910	Perf Test results (RHEL9.6) – run 3	ITTT-2908	RHEL9.6 perf
+34	ITTT-2909	Perf Test results (RHEL9.6) – run 2	ITTT-2908	RHEL9.6 perf
+35	ITTT-2908	ELK v8Ph2: Performance Tests for RHEL 9.6 upgrade	—	RHEL9.6 perf (parent)
+36	ITTT-2905	DIT IAT – Atomikos licence renewal & new licence deployment – ILE	—	Licensing
+37	ITTT-2900	ELK Trellix Performance tests	—	Trellix perf (parent)
+38	ITTT-2885	Initialise new repos for InSpec tests	—	InSpec
+39	ITTT-2301	Update ELK InSpec tests – Kafka controller	ITTT-2288	InSpec
+40	ITTT-1738	Post release checks – Prod	ITTT-1733	v8Ph2 Prod
+41	ITTT-1737	Cutover Checks – Prod	ITTT-1733	v8Ph2 Prod
+42	ITTT-1736	Non-Functional checks – Prod	ITTT-1733	v8Ph2 Prod
+43	ITTT-1735	Functional checks – Prod	ITTT-1733	v8Ph2 Prod
+44	ITTT-1734	Infra checks ELK nodes – Prod	ITTT-1733	v8Ph2 Prod
+45	ITTT-1731	Post release checks – PreProd	ITTT-1727	v8Ph2 PreProd
+46	ITTT-1730	Non-Functional checks – PreProd	ITTT-1727	v8Ph2 PreProd
+47	ITTT-1729	Functional checks – PreProd	ITTT-1727	v8Ph2 PreProd
+48	ITTT-1728	Infra checks ELK nodes – PreProd	ITTT-1727	v8Ph2 PreProd
+49	ITTT-1727	ELK v8Ph2: PreProd cluster testing	—	v8Ph2 PreProd (parent)
+50	ITTT-1726	Post release checks – Perf cluster (new RHEL9.6)	ITTT-1721	Perf cluster
+Grouping
+v8Ph2 Prod cluster testing (ITTT-1733) — 12 tickets
+v8Ph2 PreProd cluster testing (ITTT-1727) — 11 tickets
+RHEL9.6 HA/MAT testing (ITTT-2977) — 9 tickets (TC1–TC8 + pre-checks)
+RHEL9.6 performance runs (ITTT-2908) — 5 tickets (runs 2–5 + parent)
+Trellix performance runs (ITTT-2900) — 4 tickets (runs 1–3 + parent)
+Incidents/investigations — 3 (ITTT-3008, 2935, 2931)
+Auditbeat CDDM — 2 · InSpec — 2 · Trellix OAS lag — 1 · Licensing — 1
+Tickets with substantive detail
+
+ITTT-3019 — NonProd ELK, OAS enabled 05 Aug 2026 ~12:53. Evidence pipelines: elk/elk-tools/-/pipelines/658425 (Kafka), 658392 (ELK).
+
+ITTT-3008 — Prod. SOSs: core-env-cds-live, core-env-cds-tt-s1, core-env-cds-training. No logs ingested after 12:51 on 10 Aug 2026. Root cause: Kafka instance SSL certificates expired.
+
+ITTT-3010 / 3011 — Point both log-gens at the new R9 Prod cluster; verify with-cert and no-cert logs arrive; 100 logs/5 min into both bolt and others indexes. Note: with-cert (bolt) logs won't land until cut-over completes and the Kafka cname + Filebeat service are updated.
+
+ITTT-2979–2986 (TC1–TC8) — Uniform pattern: pick node → graceful shutdown → wait 15 min, gather evidence → start → wait 15 min, gather evidence. TC8 differs: stop all nodes in one AZ via AWS console.
+
+ITTT-2978 (Pre-checks) — Elastic + Kafka instances (node count, instance type, encryption-at-rest), Filebeat producers (config → dev cluster/NonProd VPC, all indexes, SOS job log rate), monitoring cluster ingestion from Metricbeat.
+
+Perf runs — all 45 dps / 70 min / env stress2 / app DMS:
+
+Ticket	Run	Date	Start	Cluster
+2947	Trellix 1	16/07/26	15:54:48	Perf + OAS
+2948	Trellix 2	17/07/26	12:05	Perf + OAS
+2949	Trellix 3	22/07/26	10:42:46	Perf + OAS
+2909	RHEL 2	06/07/26	15:15:06	Perf
+2910	RHEL 3	10/07/26	15:21	Perf
+2937	RHEL 4	13/07/26	15:44	Perf
+2943	RHEL 5	15/07/26	16:21	Perf
+
+Caveats: run 2948 had ILE ballast load in SIPT concurrently; run 2947 had DMS ballast in NIP-IPT — NIP-IPT logs share the Perf cluster, so load-test impact can't be isolated.
+
+ITTT-2931 — Still on old Kafka v2: tooling/sos-berlin-cds (agent 7.13.4), external/sns2020-application (8.19.10), others/bastion-prod-* (7.17.15). Tariff apps (tariff_uk_live, tariff_uk_load, tariff_eu_live, tariff_eu_load, qam) still on 7.17.15 but likely already using the Kafka cname — needs confirming.
+
+ITTT-1737 (Cutover) — Blocked on: ITTT-1734, 3010, 3011, 3012, 3013, 3014, 3015, 3016, 3018 (all struck through = cleared). 19 migration steps; steps 1–12 Friday evening, 13–18 Saturday/Sunday after data migration. Step 19 (restart Kibana on all 3 nodes) struck out.
+
+ITTT-2908 — NFR ticket NFRTEST-12744
